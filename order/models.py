@@ -1,17 +1,20 @@
-from django.db import models
-
 import qrcode
 from django.db import models
 from django.core.files.base import ContentFile
 from io import BytesIO
 
+# ------------------------------------------------------------------------------
 # Table Model
+# ------------------------------------------------------------------------------
 class Table(models.Model):
-    table_number = models.IntegerField(unique=True)
+    table_number = models.PositiveIntegerField(unique=True)
     availability = models.BooleanField(default=True)
-    qr_code = models.ImageField(upload_to='qrcodes/', blank=True, null=True)  # QR code for menu access
+    qr_code = models.ImageField(upload_to='qrcodes/', blank=True, null=True)
 
     def generate_qr_code(self):
+        """
+        Generates a QR code that directs to the table's menu page.
+        """
         qr = qrcode.make(f"http://localhost:8000/order/{self.table_number}/menu/")
         buffer = BytesIO()
         qr.save(buffer, format="PNG")
@@ -26,14 +29,22 @@ class Table(models.Model):
         return f"Table {self.table_number}"
 
 
-# Salad, Dishes, Soup, Desserts, Drinks
+# ------------------------------------------------------------------------------
+# Category Model
+# ------------------------------------------------------------------------------
 class Category(models.Model):
-    category_title = models.CharField(max_length=100)
-    cate_image = models.ImageField(default='taddib-icon.jpeg', blank=True)
+    title = models.CharField(max_length=100)
+    image = models.ImageField(blank=True, null=True)
+
+    class Meta:
+        verbose_name_plural = "Categories"
 
     def __str__(self):
-        return self.category_title
+        return self.title
 
+# ------------------------------------------------------------------------------
+# Menu Item Model
+# ------------------------------------------------------------------------------
 class Item(models.Model):
     name = models.CharField(max_length=100)
     description = models.TextField(null=True, blank=True)
@@ -44,7 +55,7 @@ class Item(models.Model):
     has_spicy_options = models.BooleanField(default=True)
 
     def __str__(self):
-        return f"{self.name} , {self.category.category_title}"
+        return f"{self.name} , {self.category.title}"
 
 class Customization(models.Model):
     item = models.ForeignKey(Item, on_delete=models.CASCADE, related_name='customizations')

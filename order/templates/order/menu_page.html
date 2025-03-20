@@ -11,7 +11,7 @@
     </nav>
 
     <div class="menu-container">
-        <h2>Menu</h2>
+        <h3>Table {{ table.table_number }}</h3>
         {% for category in categories %}
             <div class="category-section" id="category-{{ category.id }}">
                 <h3>{{ category.category_title }}</h3>
@@ -32,11 +32,6 @@
         {% endfor %}
 
     </div>
-{#    <div class="cart-summary">#}
-{#        <a href="{% url 'cart_summary' %}" class="cart-button" >#}
-{#            <p>Qty[#], Confirm [$20.00]</p>#}
-{#        </a>#}
-{#    </div>#}
 
     <!-- Sticky Cart Summary at the Bottom-Left -->
     <div class="sticky-cart">
