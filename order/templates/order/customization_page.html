@@ -1,0 +1,136 @@
+{% extends 'order/base.html' %}
+
+{% block content %}
+    <h2>Selection Page</h2>
+
+    <!-- item information -->
+    <article >
+        <img src="{{ item.item_image.url }}" alt="{{ item.name }}" width="100" height="100">
+        <h3>{{ item.name }}</h3>
+        <p>{{ item.description }}</p>
+    </article>
+
+    <form method="POST" action="{% url 'cart_add' table_id=table_id item_id=item.id %}">
+        {% csrf_token %}
+
+        <!-- Meat Type Selection -->
+        {% if item.has_meat_options %}
+            <h4>Meat:</h4>
+            <div class="button-group" id="meat-options">
+                <button type="button" class="option-btn" data-value="None" data-extra="0">No Meat</button>
+                <button type="button" class="option-btn" data-value="Chicken" data-extra="1.5">Chicken (+$1.5)</button>
+                <button type="button" class="option-btn" data-value="Beef" data-extra="2">Beef (+$2)</button>
+            </div>
+            <input type="hidden" name="meat" id="selected-meat" value="None">
+        {% endif %}
+
+        <!-- Spicy Level Selection -->
+        {% if item.has_spicy_options %}
+            <h4>Spiciness</h4>
+            <div class="button-group" id="spicy-options">
+                <button type="button" class="option-btn" data-value="Mild" data-extra="0">Mild</button>
+                <button type="button" class="option-btn" data-value="Medium" data-extra="0.5">Medium (+$0.5)</button>
+                <button type="button" class="option-btn" data-value="High" data-extra="1">High (+$1)</button>
+            </div>
+            <input type="hidden" name="spicy_level" id="selected-spicy" value="Mild">
+        {% endif %}
+
+        <!-- Quantity Selector -->
+{#        <h4>Quantity:</h4>#}
+{#        <div class="quantity-selector">#}
+{#            <button type="button" id="decrease-qty">-</button>#}
+{#            <span id="quantity">1</span>#}
+{#            <button type="button" id="increase-qty">+</button>#}
+{#        </div>#}
+
+
+        <!-- Popup Message -->
+        {% if messages %}
+            <div id="popup-message" class="popup">
+                {% for message in messages %}
+                    <p>{{ message }}</p>
+                {% endfor %}
+            </div>
+        {% endif %}
+        <button type="submit">Add to Cart</button>
+
+    </form>
+
+        <h3>Base Price: $<span id="base-price"></span>{{ item.base_price }}</h3>
+        <h3>Total Price: $<span id="total-price">{{ item.base_price }}</span></h3>
+
+
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Ensure base price is correctly parsed
+        const basePrice = parseFloat("{{ item.base_price|default:0 }}".replace(',', '.')) || 0;
+
+        let selectedMeat = document.getElementById("selected-meat");
+        let selectedSpicy = document.getElementById("selected-spicy");
+        let quantityElement = document.getElementById("quantity");
+        let totalPriceElement = document.getElementById("total-price");
+
+        let selectedMeatPrice = 0;
+        let selectedSpicyPrice = 0;
+        let selectedQty = 1;
+
+        function updatePrice() {
+            let totalPrice = (basePrice + selectedMeatPrice + selectedSpicyPrice) * selectedQty;
+            totalPriceElement.textContent = totalPrice.toFixed(2);
+        }
+
+        function setupOptionButtons(groupId, hiddenInput, priceVar) {
+            const buttons = document.querySelectorAll(`#${groupId} .option-btn`);
+            buttons.forEach(button => {
+                button.addEventListener("click", function () {
+                    buttons.forEach(btn => btn.classList.remove("selected"));
+                    this.classList.add("selected");
+
+                    hiddenInput.value = this.dataset.value;
+                    if (groupId === "meat-options") {
+                        selectedMeatPrice = parseFloat(this.dataset.extra) || 0;
+                    } else if (groupId === "spicy-options") {
+                        selectedSpicyPrice = parseFloat(this.dataset.extra) || 0;
+                    }
+                    updatePrice();
+                });
+            });
+        }
+
+        // Fix: Now correctly updating prices
+        setupOptionButtons("meat-options", selectedMeat, "selectedMeatPrice");
+        setupOptionButtons("spicy-options", selectedSpicy, "selectedSpicyPrice");
+
+        document.getElementById("increase-qty").addEventListener("click", function () {
+            selectedQty++;
+            quantityElement.textContent = selectedQty;
+            updatePrice();
+        });
+
+        document.getElementById("decrease-qty").addEventListener("click", function () {
+            if (selectedQty > 1) {
+                selectedQty--;
+                quantityElement.textContent = selectedQty;
+                updatePrice();
+            }
+        });
+
+        updatePrice();  // Ensure the price is set correctly at the start
+        });
+
+    <!-- Hide Popup Message -->
+    document.addEventListener('DOMContentLoaded', function () {
+        const popupMessage = document.getElementById("popup-message");
+
+        if (popupMessage) {
+            setTimeout(function () {
+                popupMessage.style.display = "none";  // Hide pop-up after 3 seconds
+            }, 3000);
+        }
+     });
+
+    </script>
+
+
+{% endblock %}

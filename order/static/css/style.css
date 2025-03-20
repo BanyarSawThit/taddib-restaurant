@@ -1,0 +1,309 @@
+/* Ensure full-page layout */
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+}
+
+/* Fixed Header */
+.page-header {
+    background: linear-gradient(to bottom, #f6a828, #d78c0e);
+    padding: 20px 0;
+    text-align: center;
+    color: white;
+    position: fixed;
+    width: 100%;
+    top: 0;
+    left: 0;
+    z-index: 1000;
+}
+
+.page-header h1 {
+    font-size: 3rem;
+    margin: 0;
+}
+
+/* Link inside h1 (anchor tag) */
+h1 a {
+    color: #030000; /* Changes the text color of the link inside h1 */
+    text-decoration: none; /* Removes underline from the link */
+}
+
+/* Optional: Style the link on hover */
+h1 a:hover {
+    color: #5b3001; /* Changes the color of the link when hovered */
+}
+
+/* Push content down below the header */
+main.container {
+    display: flex;
+    flex-grow: 1;
+    margin-top: 80px; /* Adjust based on header height */
+    height: calc(100vh - 80px); /* Ensure it fits within viewport */
+    overflow-y: auto; /* Enable vertical scrolling if content overflows */
+}
+
+/* Content Styling */
+.base-container {
+    padding: 20px;
+    flex-grow: 1; /* Allow it to grow and take up remaining space */
+    overflow-y: auto; /* Ensure scrollability for content */
+}
+
+.base-container a {
+    color: #030000;
+    text-decoration: none;
+}
+
+.base-container a:hover {
+    background-color: #f6a828;
+}
+
+.row {
+    margin-top: 30px;
+    display: flex;
+    width: 100%; /* Ensure it takes up the full available space */
+    flex-direction: column; /* Ensure the content is stacked vertically */
+}
+
+.col {
+    flex-grow: 1;
+    display: block; /* Make sure the content does not sit side by side */
+}
+
+/* For responsive design (if needed) */
+@media (max-width: 768px) {
+    .page-header h1 {
+        font-size: 2rem;
+    }
+}
+
+/* Menu-specific Styles */
+
+/* Change background for the menu page */
+body.menu-page {
+    background-color: #f8f8f8;
+}
+
+/* Enable smooth scrolling on anchor links */
+html {
+    scroll-behavior: smooth;
+}
+
+/* Sidebar */
+.sidebar {
+    width: 80px;
+    background: white;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+    padding: 20px 10px 10px;
+    overflow-y: auto;
+    position: fixed;
+    left: 0;
+    top: 130px; /* Start below header */
+    bottom: 0;
+}
+
+.category-btn {
+    background: white;
+    border: 1px solid #ddd; /* Light gray border for the line margin */
+    padding: 8px;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: 0.3s;
+    display: flex;
+    margin: 10px;
+    align-items: center;
+    justify-content: center;
+    width: 60px;
+    height: 60px;
+    /* Downward shadow */
+    box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.2); /* Adjust blur and spread as needed */
+}
+
+.category-btn img {
+    width: 40px;
+    height: 40px;
+}
+
+.category-btn:hover {
+    background-color: #f6a828;
+}
+
+.category-section {
+    padding: 20px;
+    margin-bottom: 20px;
+    border-top: 2px solid #ddd;
+}
+
+/* Menu Items Styling */
+.menu-container {
+    margin-left: 100px; /* Space for the sidebar */
+    padding: 20px;
+}
+
+.menu-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 15px;
+}
+
+.menu-item {
+    background: white;
+    padding: 10px;
+    border-radius: 10px;
+    box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
+    margin: 10px;
+    text-align: center;
+    width: 200px;
+}
+
+h2 {
+    color: #444;
+    text-align: center;
+}
+
+h3 {
+    color: #555;
+}
+
+.menu-item img {
+    width: 100%;
+    height: 150px;
+    border-radius: 8px;
+    object-fit: cover;
+}
+
+.menu-item h3 {
+    font-size: 18px;
+    margin: 10px 0;
+}
+
+.menu-item p {
+    font-size: 16px;
+    font-weight: bold;
+    color: #d78c0e;
+}
+
+.select-btn {
+    display: block;
+    padding: 8px;
+    background-color: #f19c2d;
+    color: white;
+    text-decoration: none;
+    border-radius: 5px;
+    margin-top: 10px;
+    transition: 0.3s;
+}
+
+.select-btn:hover {
+    background-color: #b06a0f;
+}
+
+/*customization_page button style starts here*/
+.button-group {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.option-btn {
+    padding: 10px 15px;
+    border: 1px solid #ccc;
+    background-color: #f8f8f8;
+    cursor: pointer;
+}
+
+.option-btn.selected {
+    background-color: #4CAF50;
+    color: white;
+    border-color: #4CAF50;
+}
+
+.quantity-selector {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.quantity-selector button {
+    padding: 5px 10px;
+    cursor: pointer;
+}
+/*customization_page button style ends here*/
+
+/*popup style*/
+.popup {
+    position: fixed;
+    top:80%;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #28a745;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 5px;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+    font-weight: bold;
+    z-index: 1000;
+    animation: fadeIn 0.5s;
+}
+/*popup style end*/
+
+/* Sticky Cart at the Bottom-Left */
+.sticky-cart {
+    position: fixed;
+    right: 0;
+    bottom: 20px; /* 20px from the bottom */
+    width: 250px; /* Control the width of the cart */
+    background: #b04f07;
+    padding: 15px 20px;
+    box-shadow: 0 -4px 10px rgba(0, 0, 0, 0.1);
+    text-align: left;
+    z-index: 1000;
+    border-radius: 10px 0 0 10px;
+}
+
+/* Sticky cart content */
+.sticky-cart-content {
+    display: flex;
+    flex-direction: column; /* Stack elements vertically */
+    justify-content: space-between;
+    align-items: flex-start;
+    height: 100%;
+}
+
+/* Sticky cart text (quantity and total) */
+.sticky-cart-text {
+    color: white;
+    font-size: 16px;
+    margin-bottom: 2px;
+}
+
+.sticky-cart-text i {
+    padding-left: 80px; /* Adds padding to the left of the total price */
+}
+
+.cart-divider {
+    border: 0; /* Remove default border */
+    border-top: 1px solid #ddd; /* Light gray border to create the line */
+    width: 100%; /* Make sure the line spans the full width */
+}
+
+/* Sticky cart action (Go to Cart link) */
+.sticky-cart-action {
+    font-size: 20px;
+    font-weight: bold;
+    margin-top: 10px;
+    color: white;
+}
+
+/* Optional: Hover effect on the "Go to Cart" link */
+.sticky-cart-action:hover {
+    color: #000000;
+}

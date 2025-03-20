@@ -1,0 +1,82 @@
+{% extends 'order/base.html' %}
+
+{% block content %}
+    <!-- Sidebar -->
+    <nav class="sidebar">
+        {% for category in categories %}
+            <button class="category-btn" data-category="{{ category.id }}">
+                <img src="{{ category.cate_image.url }}" alt="{{ category.category_title }}">
+            </button>
+        {% endfor %}
+    </nav>
+
+    <div class="menu-container">
+        <h2>Menu</h2>
+        {% for category in categories %}
+            <div class="category-section" id="category-{{ category.id }}">
+                <h3>{{ category.category_title }}</h3>
+
+                <div class="menu-grid">
+                    {% for x in menu_items %}
+                        {% if x.category.id == category.id %}
+                            <div class="menu-item" data-category="{{ x.category.id }}">
+                                <img src="{{ x.item_image.url }}" alt="{{ x.name }}">
+                                <h3>{{ x.name }}</h3>
+                                <p>${{ x.base_price }}</p>
+                                <a href="{% url 'customization_page' table_id=table_id item_id=x.pk %}" class="select-btn">Select</a>
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+        {% endfor %}
+
+    </div>
+{#    <div class="cart-summary">#}
+{#        <a href="{% url 'cart_summary' %}" class="cart-button" >#}
+{#            <p>Qty[#], Confirm [$20.00]</p>#}
+{#        </a>#}
+{#    </div>#}
+
+    <!-- Sticky Cart Summary at the Bottom-Left -->
+    <div class="sticky-cart">
+        <div class="sticky-cart-content">
+            <!-- Quantity and Total (upper part) -->
+            <span class="sticky-cart-text">
+{#                Quantity: {{ cart_quantity }}#}
+{#                <i>S$ {{ cart_total }}</i>#}
+                Cart
+            </span>
+            <hr class="cart-divider">
+            <!-- Go to Cart Link (at the bottom) -->
+            <a href="{% url 'cart_summary' %}">
+                    <span class="sticky-cart-action">
+                        Confirm Order
+                    </span>
+            </a>
+        </div>
+    </div>
+
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const categoryBtns = document.querySelectorAll(".category-btn");
+
+            categoryBtns.forEach(btn => {
+                btn.addEventListener("click", () => {
+                    const selectedCategory = btn.getAttribute("data-category");
+                    const categorySection = document.getElementById('category-' + selectedCategory);
+
+                    // Scroll to the section of the selected category
+                    if (categorySection) {
+                        categorySection.scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'start'
+                        });
+                    }
+                });
+            });
+        });
+    </script>
+
+{% endblock %}

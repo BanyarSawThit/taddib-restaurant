@@ -1,0 +1,23 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>TADDIB</title>
+        <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    </head>
+    <body>
+        <header class="page-header">
+            <div class="container base-container">
+                <h1><a href="{% url 'table_select' %}">TADDIB</a></h1>
+            </div>
+        </header>
+        <main class="container base-container">
+            <div class="row">
+                <div class="col">
+                    {% block content %}
+                    {% endblock %}
+                </div>
+            </div>
+        </main>
+    </body>
+</html>
