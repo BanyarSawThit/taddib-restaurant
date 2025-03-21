@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect
 from django.contrib import messages
-from order.models import Item, Table, Customization, UserOrder, OrderItem
+from order.models import Item, Table, Selection, Order, OrderItem
 from decimal import Decimal
 
 # Create your views here.
@@ -10,7 +10,7 @@ def cart_summary(request):
     cart_items = []
     for item in cart['items']:
         item_obj = Item.objects.get(pk=item['item_id'])
-        customization_obj = Customization.objects.get(pk=item['customization_id']) if item['customization_id'] else None
+        customization_obj = Selection.objects.get(pk=item['customization_id']) if item['customization_id'] else None
 
         cart_items.append({
             'item': item_obj,
@@ -30,7 +30,7 @@ def cart_add(request, table_id, item_id):
     quantity = int(request.POST.get('quantity', 1))
 
     # find or create the customization
-    customization, created = Customization.objects.get_or_create(
+    customization, created = Selection.objects.get_or_create(
         item=item, meat=meat, spicy_level=spicy_level
     )
 
@@ -75,12 +75,12 @@ def cart_confirm(request):
 
     table = Table.objects.get(pk=cart['table_id'])
 
-    # Create UserOrder
-    user_order = UserOrder.objects.create(table=table, status="Pending")
+    # Create Order
+    user_order = Order.objects.create(table=table, status="Pending")
 
     # Create OrderItems
     for item in cart['items']:
-        customization = Customization.objects.get(pk=item['customization_id']) if item['customization_id'] else None
+        customization = Selection.objects.get(pk=item['customization_id']) if item['customization_id'] else None
         OrderItem.objects.create(
             user_order=user_order,
             customization=customization,

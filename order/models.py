@@ -1,84 +1,217 @@
+from decimal import Decimal
 import qrcode
 from django.db import models
 from django.core.files.base import ContentFile
 from io import BytesIO
 
 # ------------------------------------------------------------------------------
-# Table Model
+# Table Model: Represents a dining table in the restaurant.
 # ------------------------------------------------------------------------------
 class Table(models.Model):
+    # A unique number identifying each table.
     table_number = models.PositiveIntegerField(unique=True)
+    # Indicates if the table is currently available (True by default).
     availability = models.BooleanField(default=True)
+    # Stores the QR code image for the table; optional field.
     qr_code = models.ImageField(upload_to='qrcodes/', blank=True, null=True)
 
     def generate_qr_code(self):
         """
         Generates a QR code that directs to the table's menu page.
         """
+        # Create a QR code with a URL that includes the table number.
         qr = qrcode.make(f"http://localhost:8000/order/{self.table_number}/menu/")
-        buffer = BytesIO()
-        qr.save(buffer, format="PNG")
+        buffer = BytesIO()  # Buffer to temporarily hold the image data.
+        qr.save(buffer, format="PNG")  # Save the QR code image into the buffer.
+        # Save the image to the qr_code field without immediately saving the model.
         self.qr_code.save(f'table_{self.table_number}.png', ContentFile(buffer.getvalue()), save=False)
 
     def save(self, *args, **kwargs):
+        """
+        Overrides the default save method.
+        Generates a QR code if one does not already exist before saving the instance.
+        """
         if not self.qr_code:
             self.generate_qr_code()
+        # Call the parent save method to perform the actual database save.
         super().save(*args, **kwargs)
 
     def __str__(self):
+        """
+        String representation of the Table.
+        """
         return f"Table {self.table_number}"
 
 
 # ------------------------------------------------------------------------------
-# Category Model
+# Category Model: Represents a category for menu items (e.g., Appetizers, Drinks).
 # ------------------------------------------------------------------------------
 class Category(models.Model):
+    # Title of the category.
     title = models.CharField(max_length=100)
+    # Optional image representing the category.
     image = models.ImageField(blank=True, null=True)
 
     class Meta:
+        # Specifies plural name to be displayed in the admin interface.
         verbose_name_plural = "Categories"
 
     def __str__(self):
+        """
+        String representation of the Category.
+        """
         return self.title
 
+
 # ------------------------------------------------------------------------------
-# Menu Item Model
+# Item Model: Represents a menu item.
 # ------------------------------------------------------------------------------
 class Item(models.Model):
+    # Name of the menu item.
     name = models.CharField(max_length=100)
+    # Detailed description of the menu item; optional.
     description = models.TextField(null=True, blank=True)
-    category = models.ForeignKey(Category, on_delete=models.CASCADE)
-    item_image = models.ImageField(default='supernova.jpg', blank=True)
-    base_price = models.DecimalField(max_digits=5, decimal_places=2)
-    has_meat_options = models.BooleanField(default=True)
-    has_spicy_options = models.BooleanField(default=True)
+    # Relationship to a category; if a category is deleted, all related items are deleted.
+    category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name='items')
+    # Optional image of the menu item.
+    image = models.ImageField(blank=True, null=True)
+    # Base price of the menu item.
+    base_price = models.DecimalField(max_digits=6, decimal_places=2)
+    # Indicates whether this item has additional meat options.
+    has_meat_options = models.BooleanField(default=False)
+    # Indicates whether this item has spicy options.
+    has_spicy_options = models.BooleanField(default=False)
+
+    def get_meat_options(self):
+        """
+        Returns available meat options if this item supports them;
+        otherwise, returns an empty queryset.
+        """
+        if self.has_meat_options:
+            # Could later be extended to filter options specific to this item.
+            return MeatOption.objects.all()
+        return MeatOption.objects.none()
 
     def __str__(self):
+        """
+        String representation of the Item.
+        """
         return f"{self.name} , {self.category.title}"
 
-class Customization(models.Model):
-    item = models.ForeignKey(Item, on_delete=models.CASCADE, related_name='customizations')
-    meat = models.CharField(max_length=50, choices=[('Beef', 'Beef'), ('Chicken', 'Chicken')], blank=True, null=True)
-    spicy_level = models.CharField(max_length=50, choices=[('Mild', 'Mild'), ('Medium', 'Medium'), ('High', 'High')])
+
+# ------------------------------------------------------------------------------
+# MeatOption Model: Represents extra meat options that may add an extra cost.
+# ------------------------------------------------------------------------------
+class MeatOption(models.Model):
+    # Name of the meat option; must be unique.
+    name = models.CharField(max_length=50, unique=True)
+    # Extra cost associated with the meat option.
     extra_cost = models.DecimalField(max_digits=5, decimal_places=2, default=0.00)
 
     def __str__(self):
-        return f'{self.item.name} ( meat-{self.meat} , spicy-{self.spicy_level})'
+        """
+        String representation of the MeatOption.
+        """
+        return f"{self.name} (+S${self.extra_cost})"
 
-class UserOrder(models.Model):
-    table = models.ForeignKey(Table, on_delete=models.CASCADE)
-    date_ordered = models.DateTimeField(auto_now_add=True)
-    status = models.CharField(max_length=50, choices=[('Pending', 'Pending'), ('Completed', 'Completed')])
+
+# ------------------------------------------------------------------------------
+# SpicyLevel Model: Represents different levels of spiciness.
+# ------------------------------------------------------------------------------
+class SpicyLevel(models.Model):
+    # Name of the spicy level; must be unique.
+    name = models.CharField(max_length=50, unique=True, help_text="Label for the spiciness level (e.g., Mild, Medium, Hot)")
 
     def __str__(self):
+        """
+        String representation of the SpicyLevel.
+        """
+        return self.name
+
+
+# ------------------------------------------------------------------------------
+# Selection Model: Represents the customization choices for an item.
+# ------------------------------------------------------------------------------
+class Selection(models.Model):
+    # Relationship to a menu item.
+    item = models.ForeignKey(Item, on_delete=models.CASCADE, related_name='selections')
+    # Optional meat option; if deleted, this field is set to null.
+    meat_option = models.ForeignKey(MeatOption, on_delete=models.SET_NULL, null=True, blank=True)
+    # Optional spicy level; if deleted, this field is set to null.
+    spicy_level = models.ForeignKey(SpicyLevel, on_delete=models.SET_NULL, null=True, blank=True)
+
+    def get_extra_cost(self):
+        """
+        Returns additional cost from the selected meat option if available.
+        """
+        return Decimal(self.meat_option.extra_cost) if self.meat_option else Decimal(0.00)
+
+    def __str__(self):
+        """
+        String representation of the Selection.
+        Combines the item name with the selected meat and spicy options.
+        """
+        meat_str = f"Meat: {self.meat_option}" if self.meat_option else "No Meat"
+        spicy_str = f"Spicy: {self.spicy_level}" if self.spicy_level else "No Spicy"
+        return f"{self.item.name} ({meat_str}, {spicy_str})"
+
+
+# ------------------------------------------------------------------------------
+# Order Model: Represents a customer's order.
+# ------------------------------------------------------------------------------
+class Order(models.Model):
+    # Link to the table where the order was placed.
+    table = models.ForeignKey(Table, on_delete=models.CASCADE, related_name='orders')
+    # Automatically set the date and time when the order is created.
+    date_ordered = models.DateTimeField(auto_now_add=True)
+
+    # Possible statuses for an order.
+    STATUS_CHOICES = [
+        ('Pending', 'Pending'),
+        ('Completed', 'Completed'),
+        # Additional statuses (e.g., 'In Progress', 'Cancelled') can be added later.
+    ]
+    # Current status of the order, defaults to 'Pending'.
+    status = models.CharField(max_length=50, choices=STATUS_CHOICES, default='Pending')
+
+    def get_total(self):
+        """
+        Calculates the total amount for the order by summing the total prices of all associated order items.
+        """
+        return sum(item.total_price for item in self.order_items.all())
+
+    def __str__(self):
+        """
+        String representation of the Order.
+        Includes the order ID, table number, and current status.
+        """
         return f'Order {self.id} , Table {self.table.table_number} ({self.status})'
 
+
+# ------------------------------------------------------------------------------
+# OrderItem Model: Represents an individual item within an order.
+# ------------------------------------------------------------------------------
 class OrderItem(models.Model):
-    user_order = models.ForeignKey(UserOrder, on_delete=models.CASCADE)
-    customization= models.ForeignKey(Customization, on_delete=models.CASCADE)
-    quantity = models.IntegerField()
-    total_price = models.DecimalField(max_digits=10, decimal_places=2)
+    # Link to the parent order; this field is non-nullable.
+    order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='order_items')
+    # Link to the selected customization for the item.
+    selection = models.ForeignKey(Selection, on_delete=models.CASCADE)
+    # Quantity of the selected item; defaults to 1.
+    quantity = models.PositiveIntegerField(default=1)
+    # Total price calculated from the base price, any extra costs, and the quantity.
+    total_price = models.DecimalField(max_digits=10, decimal_places=2, editable=False)
+
+    def save(self, *args, **kwargs):
+        """
+        Overrides the save method to calculate and update the total price before saving.
+        It multiplies the sum of the base price and any extra cost by the quantity.
+        """
+        self.total_price = (self.selection.item.base_price + self.selection.get_extra_cost()) * self.quantity
+        super().save(*args, **kwargs)
 
     def __str__(self):
-        return f"{self.customization.item.name} x {self.quantity} - Order {self.user_order.id}"
+        """
+        String representation of the OrderItem.
+        Displays the item's name, quantity, and the associated order's ID.
+        """
+        return f"{self.selection.item.name} x {self.quantity} (Order {self.order.pk})"

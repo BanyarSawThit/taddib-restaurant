@@ -1,7 +1,7 @@
 from django import forms
-from .models import Customization
+from .models import Selection
 
-class CustomizationForm(forms.ModelForm):
+class SelectionForm(forms.ModelForm):
     class Meta:
-        model = Customization
-        fields = ['meat', 'spicy_level']
+        model = Selection
+        fields = ['meat_option', 'spicy_level']
