@@ -1,14 +1,16 @@
 from django.shortcuts import render, get_object_or_404
-from .models import Table, Category, Item,  Customization, UserOrder, OrderItem
+from .models import Table, Category, Item, Customization, UserOrder, OrderItem
 from .forms import CustomizationForm
 from django.contrib import messages
+
 
 # Render the table selection page
 def table_view(request):
     tables = Table.objects.all()
     return render(request, 'order/table_page.html', {'tables': tables})
-def menu_page(request, table_id):
 
+
+def menu_page(request, table_id):
     table = get_object_or_404(Table, pk=table_id)
     categories = Category.objects.all()
     menu_items = Item.objects.all()
@@ -39,4 +41,4 @@ def customization_page(request, table_id, item_id):
         else:
             form = CustomizationForm()
 
-    return render(request, 'order/customization_page.html', {'item':item, 'form': form, 'table_id': table_id})
+    return render(request, 'order/customization_page.html', {'item': item, 'form': form, 'table_id': table_id})

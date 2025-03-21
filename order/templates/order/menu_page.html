@@ -5,7 +5,7 @@
     <nav class="sidebar">
         {% for category in categories %}
             <button class="category-btn" data-category="{{ category.id }}">
-                <img src="{{ category.cate_image.url }}" alt="{{ category.category_title }}">
+                <img src="{{ category.cart_image.url }}" alt="{{ category.title }}">
             </button>
         {% endfor %}
     </nav>
@@ -14,7 +14,7 @@
         <h3>Table {{ table.table_number }}</h3>
         {% for category in categories %}
             <div class="category-section" id="category-{{ category.id }}">
-                <h3>{{ category.category_title }}</h3>
+                <h3>{{ category.title }}</h3>
 
                 <div class="menu-grid">
                     {% for x in menu_items %}
