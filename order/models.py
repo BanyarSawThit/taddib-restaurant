@@ -65,7 +65,6 @@ class Item(models.Model):
 class Customization(models.Model):
     item = models.ForeignKey(Item, on_delete=models.CASCADE, related_name='customizations')
     meat = models.CharField(max_length=50, choices=[('Beef', 'Beef'), ('Chicken', 'Chicken')], blank=True, null=True)
-    # FIX: Added a default value for spicy_level to satisfy the NOT NULL constraint
     spicy_level = models.CharField(
         max_length=50,
         choices=[('Mild', 'Mild'), ('Medium', 'Medium'), ('High', 'High')],
@@ -94,9 +93,12 @@ class UserOrder(models.Model):
 # ------------------------------------------------------------------------------
 class OrderItem(models.Model):
     user_order = models.ForeignKey(UserOrder, on_delete=models.CASCADE)
-    customization = models.ForeignKey(Customization, on_delete=models.CASCADE)
+    customization = models.ForeignKey(Customization, on_delete=models.CASCADE, null=True, blank=True)
     quantity = models.IntegerField()
     total_price = models.DecimalField(max_digits=10, decimal_places=2)
 
     def __str__(self):
-        return f"{self.customization.item.name} x {self.quantity} - Order {self.user_order.id}"
+        if self.customization:
+            return f"{self.customization.item.name} x {self.quantity} - Order {self.user_order.id}"
+        else:
+            return f"Order Item (No Customization) x {self.quantity} - Order {self.user_order.id}"
