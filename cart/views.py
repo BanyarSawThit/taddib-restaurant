@@ -4,7 +4,12 @@ from order.models import Item, Table, Selection, Order, OrderItem
 from decimal import Decimal
 
 # Create your views here.
-def cart_summary(request):
+def cart_view(request):
+    """
+    Display the cart summary.
+    Reads cart items from the session, looks up corresponding objects,
+    and
+    """
     cart = request.session.get('cart', {'items': []})
 
     cart_items = []
@@ -59,11 +64,6 @@ def cart_add(request, table_id, item_id):
     messages.success(request, 'Item added to cart!')
 
     return redirect('menu_page', table_id=table.id)
-
-def cart_delete(request):
-    pass
-def cart_update(request):
-    pass
 
 def cart_confirm(request):
     """ Convert session cart into a database order. """

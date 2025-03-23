@@ -5,7 +5,7 @@
     <nav class="sidebar">
         {% for category in categories %}
             <button class="category-btn" data-category="{{ category.id }}">
-                <img src="{{ category.cate_image.url }}" alt="{{ category.category_title }}">
+                <img src="{{ category.image.url }}" alt="{{ category.title }}">
             </button>
         {% endfor %}
     </nav>
@@ -20,10 +20,10 @@
                     {% for x in menu_items %}
                         {% if x.category.id == category.id %}
                             <div class="menu-item" data-category="{{ x.category.id }}">
-                                <img src="{{ x.item_image.url }}" alt="{{ x.name }}">
+                                <img src="{{ x.image.url }}" alt="{{ x.name }}">
                                 <h3>{{ x.name }}</h3>
                                 <p>${{ x.base_price }}</p>
-                                <a href="{% url 'customization_page' table_id=table_id item_id=x.pk %}" class="select-btn">Select</a>
+                                <a href="{% url 'selection_view' table_id=table_id item_id=x.pk %}" class="select-btn">Select</a>
                             </div>
                         {% endif %}
                     {% endfor %}
@@ -44,7 +44,7 @@
             </span>
             <hr class="cart-divider">
             <!-- Go to Cart Link (at the bottom) -->
-            <a href="{% url 'cart_summary' %}">
+            <a href="{% url 'cart_view' %}">
                     <span class="sticky-cart-action">
                         Confirm Order
                     </span>
