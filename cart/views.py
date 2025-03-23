@@ -3,7 +3,6 @@ from django.contrib import messages
 from order.models import Item, Table, Customization, UserOrder, OrderItem
 from decimal import Decimal
 
-# Create your views here.
 def cart_summary(request):
     cart = request.session.get('cart', {'items': []})
 
@@ -26,24 +25,26 @@ def cart_add(request, table_id, item_id):
     table = Table.objects.get(pk=table_id)
 
     meat = request.POST.get('meat', None)
-    spicy_level = request.POST.get('spicy_level', None)
+    # Use a default spicy level of 'Mild' if not provided.
+    spicy_level = request.POST.get('spicy_level') or 'Mild'
+    # Validate spicy_level against allowed choices.
+    allowed_spicy = ['Mild', 'Medium', 'High']
+    if spicy_level not in allowed_spicy:
+        spicy_level = 'Mild'
+
     quantity = int(request.POST.get('quantity', 1))
 
-    # find or create the customization
+    # Find or create the customization with the provided meat and spicy_level.
     customization, created = Customization.objects.get_or_create(
         item=item, meat=meat, spicy_level=spicy_level
     )
 
-    # Convert float values to Decimal before multiplying
+    # Convert POST values for extra prices to Decimal.
     selected_meat_price = Decimal(str(request.POST.get("selected_meat_price", 0)))
     selected_spicy_price = Decimal(str(request.POST.get("selected_spicy_price", 0)))
-    quantity = int(request.POST.get("quantity", 1))  # Ensure quantity is an integer
-
-    # calculate total price
-    extra_cost = customization.extra_cost if customization else Decimal(0)
-    # total_price = Decimal(item.base_price * extra_cost) * Decimal(quantity)
     total_price = (item.base_price + selected_meat_price + selected_spicy_price) * Decimal(quantity)
 
+    # Initialize session cart if not already present.
     if 'cart' not in request.session:
         request.session['cart'] = {'table_id': table_id, 'items': []}
 
@@ -52,21 +53,22 @@ def cart_add(request, table_id, item_id):
         'item_id': item.id,
         'customization_id': customization.id,
         'quantity': quantity,
-        'total_price': float(total_price)  # Convert Decimal to float for session storage
+        'total_price': float(total_price)  # Convert Decimal to float for session storage.
     })
 
-    request.session.modified = True # save session changes
+    request.session.modified = True  # Save session changes.
     messages.success(request, 'Item added to cart!')
 
     return redirect('menu_page', table_id=table.id)
 
 def cart_delete(request):
     pass
+
 def cart_update(request):
     pass
 
 def cart_confirm(request):
-    """ Convert session cart into a database order. """
+    """Convert session cart into a database order."""
     cart = request.session.get('cart', None)
 
     if not cart or not cart['items']:
@@ -75,10 +77,10 @@ def cart_confirm(request):
 
     table = Table.objects.get(pk=cart['table_id'])
 
-    # Create UserOrder
+    # Create UserOrder.
     user_order = UserOrder.objects.create(table=table, status="Pending")
 
-    # Create OrderItems
+    # Create OrderItems.
     for item in cart['items']:
         customization = Customization.objects.get(pk=item['customization_id']) if item['customization_id'] else None
         OrderItem.objects.create(
@@ -88,7 +90,7 @@ def cart_confirm(request):
             total_price=item['total_price']
         )
 
-    # Clear session cart
+    # Clear session cart.
     del request.session['cart']
     request.session.modified = True
 
