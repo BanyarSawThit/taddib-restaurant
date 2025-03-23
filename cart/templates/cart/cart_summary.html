@@ -2,18 +2,36 @@
 
 {% block content %}
     <h2>Cart Summary</h2>
-    {% for item in cart_items %}
-        <div>
-            <h3>{{ item.item.name }}</h3>
-            {% if item.customization %}
-                <p>Meat: {{ item.customization.meat }}</p>
-                <p>Spicy Level: {{ item.customization.spicy_level }}</p>
+
+    {% if cart_items %}
+        {% for cart_item in cart_items %}
+            {% if cart_item.item %}
+                <div>
+                    <h3>{{ cart_item.item.name }}</h3>
+
+                    {% if cart_item.customization %}
+                        {% if cart_item.item.has_meat_options %}
+                            <p>Meat: {{ cart_item.customization.meat|default:"N/A" }}</p>
+                        {% endif %}
+
+                        {% if cart_item.item.has_spicy_options %}
+                            <p>Spicy Level: {{ cart_item.customization.spicy_level|default:"N/A" }}</p>
+                        {% endif %}
+                    {% else %}
+                        <p>No customization available.</p>
+                    {% endif %}
+
+                    <p>Quantity: {{ cart_item.quantity }}</p>
+                    <p>Total Price: ${{ cart_item.total_price }}</p>
+                </div>
+                <hr>
+            {% else %}
+                <p>Item not found.</p>
             {% endif %}
-            <p>Quantity: {{ item.quantity }}</p>
-            <p>Total Price: ${{ item.total_price }}</p>
-        </div>
-        <hr>
-    {% endfor %}
+        {% endfor %}
+    {% else %}
+        <p>Your cart is empty.</p>
+    {% endif %}
 
     <a href="{% url 'cart_confirm' %}">Confirm Order</a>
 {% endblock %}
