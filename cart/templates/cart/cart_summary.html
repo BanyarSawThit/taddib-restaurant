@@ -2,15 +2,23 @@
 
 {% block content %}
     <h2>Cart Summary</h2>
-    {% for item in cart_items %}
+    {% for item in cart %}
         <div>
             <h3>{{ item.item.name }}</h3>
-            {% if item.customization %}
-                <p>Meat: {{ item.customization.meat }}</p>
-                <p>Spicy Level: {{ item.customization.spicy_level }}</p>
+            {% if item.selection %}
+                <p>Meat: {{ item.meat_option.name }}</p>
+            {% else %}
+                <p>Meat: None</p>
             {% endif %}
+
+            {% if item.spicy_level %}
+                    <p>Spicy Level: {{ item.spicy_level.name }}</p>
+                {% else %}
+                    <p>Spicy Level: 0</p>
+                {% endif %}
+
             <p>Quantity: {{ item.quantity }}</p>
-            <p>Total Price: ${{ item.total_price }}</p>
+            <p>Total Price: ${{ item.item_total }}</p>
         </div>
         <hr>
     {% endfor %}

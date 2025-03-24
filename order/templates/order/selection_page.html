@@ -17,13 +17,17 @@
         {% if item.has_meat_options %}
             <h4>Meat Options:</h4>
             <div class="button-group" id="meat-options">
+                <!-- Default option: No Meat -->
+                <button type="button" class="option-btn selected" data-value="" data-extra="0">
+                    No Meat
+                </button>
                     {% for meat in item.get_meat_options %}
                         <button
                                 type="button"
                                 class="option-btn"
                                 data-value="{{ meat.id }}"
                                 data-extra="{{ meat.extra_cost }}">
-                            {{ meat.name }} (+${{ meat.extra_cost }}
+                            {{ meat.name }} (+${{ meat.extra_cost }})
                         </button>
                 {% endfor %}
             </div>
@@ -54,7 +58,7 @@
 
       <!-- Display any popup messages -->
       {% if messages %}
-          <div id="popup-message" class="popup">
+          <div class="messages">
               {% for message in messages %}
                   <p>{{ message }}</p>
               {% endfor %}
@@ -65,7 +69,6 @@
   </form>
 
   <!-- Price Display -->
-  <h3>Base Price: $<span id="base-price">{{ item.base_price }}</span></h3>
   <h3>Total Price: $<span id="total-price">{{ item.base_price }}</span></h3>
 
 

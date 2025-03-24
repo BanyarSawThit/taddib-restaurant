@@ -13,7 +13,7 @@ class Table(models.Model):
     # Indicates if the table is currently available (True by default).
     availability = models.BooleanField(default=True)
     # Stores the QR code image for the table; optional field.
-    qr_code = models.ImageField(upload_to='qrcodes/', blank=True, null=True)
+    qr_code = models.ImageField(upload_to='qrcodes/', blank=True, null=True, help_text='create a qr code everytime a table is saved!')
 
     def generate_qr_code(self):
         """
