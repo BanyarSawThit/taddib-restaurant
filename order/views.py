@@ -4,6 +4,7 @@ from .forms import CustomizationForm
 from django.contrib import messages
 
 # Render the table selection page
+
 def table_view(request):
     tables = Table.objects.all()
     return render(request, 'order/table_page.html', {'tables': tables})

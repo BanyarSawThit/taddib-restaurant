@@ -2,11 +2,13 @@ import qrcode
 from django.db import models
 from django.core.files.base import ContentFile
 from io import BytesIO
+from django.urls import reverse
 
 # ------------------------------------------------------------------------------
 # Table Model
 # ------------------------------------------------------------------------------
 class Table(models.Model):
+    objects = None
     table_number = models.PositiveIntegerField(unique=True)
     availability = models.BooleanField(default=True)
     qr_code = models.ImageField(upload_to='qrcodes/', blank=True, null=True)
@@ -15,7 +17,9 @@ class Table(models.Model):
         """
         Generates a QR code that directs to the table's menu page.
         """
-        qr = qrcode.make(f"http://localhost:8000/order/{self.table_number}/menu/")
+        url = reverse('menu_page', args=[self.table_number])
+        full_url = f"http://localhost:8000{url}"  # Replace with your domain in production
+        qr = qrcode.make(full_url)
         buffer = BytesIO()
         qr.save(buffer, format="PNG")
         self.qr_code.save(f'table_{self.table_number}.png', ContentFile(buffer.getvalue()), save=False)
@@ -46,6 +50,7 @@ class Category(models.Model):
 # Menu Item Model
 # ------------------------------------------------------------------------------
 class Item(models.Model):
+    objects = None
     name = models.CharField(max_length=100)
     description = models.TextField(null=True, blank=True)
     category = models.ForeignKey(Category, on_delete=models.CASCADE)
@@ -57,7 +62,9 @@ class Item(models.Model):
     def __str__(self):
         return f"{self.name} , {self.category.title}"
 
+
 class Customization(models.Model):
+    objects = None
     item = models.ForeignKey(Item, on_delete=models.CASCADE, related_name='customizations')
     meat = models.CharField(max_length=50, choices=[('Beef', 'Beef'), ('Chicken', 'Chicken')], blank=True, null=True)
     spicy_level = models.CharField(max_length=50, choices=[('Mild', 'Mild'), ('Medium', 'Medium'), ('High', 'High')])
@@ -66,7 +73,9 @@ class Customization(models.Model):
     def __str__(self):
         return f'{self.item.name} ( meat-{self.meat} , spicy-{self.spicy_level})'
 
+
 class UserOrder(models.Model):
+    objects = None
     table = models.ForeignKey(Table, on_delete=models.CASCADE)
     date_ordered = models.DateTimeField(auto_now_add=True)
     status = models.CharField(max_length=50, choices=[('Pending', 'Pending'), ('Completed', 'Completed')])
@@ -75,6 +84,7 @@ class UserOrder(models.Model):
         return f'Order {self.id} , Table {self.table.table_number} ({self.status})'
 
 class OrderItem(models.Model):
+    objects = None
     user_order = models.ForeignKey(UserOrder, on_delete=models.CASCADE)
     customization= models.ForeignKey(Customization, on_delete=models.CASCADE)
     quantity = models.IntegerField()

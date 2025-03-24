@@ -1,3 +1,4 @@
+<!-- cart_summary.html -->
 {% extends 'order/base.html' %}
 
 {% block content %}
@@ -11,9 +12,12 @@
             {% endif %}
             <p>Quantity: {{ item.quantity }}</p>
             <p>Total Price: ${{ item.total_price }}</p>
+            <a href="{% url 'cart_delete' item.item.id %}">Remove</a>
+            <a href="{% url 'selection_page' table_id=cart.table_id item_id=item.item.id %}">Edit</a>
         </div>
         <hr>
     {% endfor %}
 
+    <a href="{% url 'menu_page' table_id=cart.table_id %}">Continue Shopping</a>
     <a href="{% url 'cart_confirm' %}">Confirm Order</a>
 {% endblock %}
