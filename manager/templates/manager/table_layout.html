@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Table Layout - Taddib House</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+</head>
+<body>
+<div class="header">
+    <h1>Table Layout</h1>
+    <h4>Access: Manager</h4>
+</div>
+<div class="table-container">
+    {% for table in tables %}
+    <div class="table-card {% if table.availability %}available{% else %}occupied{% endif %}">
+        <h3>Table {{ table.table_number }}</h3>
+        <p>Status: {{ table.availability|yesno:"Available,Occupied" }}</p>
+        <a href="{% url 'edit-table' table.id %}">Edit</a>
+    </div>
+    {% endfor %}
+</div>
+</body>
+</html>
