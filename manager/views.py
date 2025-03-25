@@ -7,6 +7,31 @@ def table_layout(request):
     tables = Table.objects.all()
     return render(request, 'manager/table_layout.html', {'tables': tables})
 
+def edit_table(request, table_id):
+    table = get_object_or_404(Table, id=table_id)
+    if request.method == 'POST':
+        table.availability = request.POST.get('availability') == 'on'
+        table.save()
+        return redirect('table-layout')
+    return render(request, 'manager/edit_table.html', {'table': table})
+
+def add_table(request):
+    if request.method == 'POST':
+        # Find the highest current table number
+        max_table = Table.objects.order_by('-table_number').first()
+        new_number = max_table.table_number + 1 if max_table else 1
+
+        # Create new table
+        Table.objects.create(
+            table_number=new_number,
+            availability=True
+        )
+    return redirect('table-layout')
+
+def delete_table(request, table_id):
+    table = get_object_or_404(Table, id=table_id)
+    table.delete()
+    return redirect('table-layout')
 
 def edit_menu_item(request, item_id):
     item = get_object_or_404(Item, id=item_id)
@@ -23,17 +48,6 @@ def edit_menu_item(request, item_id):
         'item': item,
         'categories': categories,
     })
-
-
-def edit_table(request, table_id):
-    table = get_object_or_404(Table, id=table_id)
-    if request.method == 'POST':
-        table.table_number = request.POST.get('table_number')
-        table.availability = request.POST.get('availability') == 'on'
-        table.save()
-        return redirect('table-layout')
-    return render(request, 'manager/edit_table.html', {'table': table})
-
 
 def menu_items(request):
     items = Item.objects.all()

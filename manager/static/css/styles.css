@@ -43,7 +43,7 @@ body {
 .menu-container, .table-container {
     display: flex;
     flex-wrap: wrap;
-    gap: 15px;
+    gap: 10px;
     padding: 20px;
     max-width: 1200px;
     margin: 0 auto;
@@ -69,7 +69,7 @@ body {
 }
 
 .table-card {
-    width: calc(32% - 30px);
+    width: 30%;
     text-align: center;
 }
 
@@ -98,7 +98,7 @@ body {
 
 .table-card a {
     text-decoration: none;
-    color: #3498db;
+    /*color: #3498db;*/
     font-weight: bold;
 }
 
@@ -170,4 +170,69 @@ form button:hover {
 
 .edit-table-container a:hover {
     text-decoration: underline;
+}
+
+/* Tables Addition and Deletion buttons */
+.action-buttons {
+    text-align: center;
+    margin-top: 20px;
+}
+
+.btn {
+    display: inline-block;
+    padding: 10px 20px;
+    margin: 0 5px;
+    border-radius: 4px;
+    text-decoration: none;
+    font-weight: bold;
+    transition: background-color 0.3s;
+}
+
+.add-btn {
+    background-color: #4CAF50;
+    color: white;
+    width: 30%;
+    font-size: 18px;
+}
+
+.add-btn:hover {
+    background-color: #45a049;
+}
+
+.delete-btn {
+    background-color: #f44336;
+    color: white;
+}
+
+.delete-btn:hover {
+    background-color: #da190b;
+}
+
+.table-deletion {
+    margin-top: 15px;
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+}
+
+/*QR codes for manager side*/
+
+.qr-code-container {
+    margin: 0 auto 15px auto;
+    text-align: center;
+}
+
+.qr-code {
+    width: 120px;
+    height: 120px;
+    border: 1px solid #ddd;
+
+    background: white;
+}
+
+.table-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 15px;
 }
