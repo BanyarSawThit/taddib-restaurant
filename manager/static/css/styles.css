@@ -1,65 +1,85 @@
+:root {
+    /* Color Variables */
+    --primary-color: #f6a828;
+    --primary-dark: #d7730e;
+    --secondary-color: #4CAF50;
+    --secondary-dark: #45a049;
+    --danger-color: #f44336;
+    --danger-dark: #da190b;
+    --info-color: #3498db;
+    --info-dark: #2980b9;
+    --text-color: #5e5d5d;
+    --light-color: #f9f9f9;
+    --white: #ffffff;
+    --border-color: #ddd;
+    --shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
+    /* Spacing Variables */
+    --spacing-sm: 5px;
+    --spacing-md: 10px;
+    --spacing-lg: 15px;
+    --spacing-xl: 20px;
+
+    /* Border Variables */
+    --border-radius-sm: 4px;
+    --border-radius-md: 5px;
+    --border-radius-lg: 8px;
+}
+
 /* Base Styles */
 body {
     font-family: Arial, sans-serif;
-    background-color: #f9f9f9;
-    color: #333;
+    background-color: var(--light-color);
     margin: 0;
     padding: 0;
+    color: var(--text-color);
 }
 
-.header {
-    background: linear-gradient(to bottom, #f6a828, #d78c0e);
-    color: white;
-    padding: 20px;
-    text-align: center;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-}
-
-.header h1, .header h4 {
+/* Typography */
+h1, h2, h3, h4 {
     margin: 0;
 }
 
-.header h4 {
-    margin-top: 5px;
+h3 {
     font-size: 1.2em;
 }
 
-.summary, .edit-table-container {
-    background-color: #fff;
-    padding: 15px;
-    margin: 20px auto;
-    border-radius: 5px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    max-width: 800px;
+/* Layout Components */
+.header {
+    background: linear-gradient(to bottom, var(--primary-color), var(--primary-dark));
+    color: var(--white);
+    padding: var(--spacing-xl);
     text-align: center;
+    box-shadow: var(--shadow);
 }
 
-.summary h4 {
-    margin: 5px 0;
-    color: #555;
+.header h4 {
+    margin-top: var(--spacing-sm);
 }
 
-/* Container Styles */
-.menu-container, .table-container {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-    padding: 20px;
+.container {
     max-width: 1200px;
     margin: 0 auto;
+    padding: var(--spacing-xl);
 }
 
-/* Card Styles */
-.menu-card, .table-card {
-    background-color: #fff;
-    border: 1px solid #ddd;
-    border-radius: 5px;
-    padding: 10px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+.grid-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-md);
+}
+
+/* Cards */
+.card {
+    background-color: var(--white);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-md);
+    padding: var(--spacing-md);
+    box-shadow: var(--shadow);
     transition: transform 0.2s, box-shadow 0.2s;
 }
 
-.menu-card:hover, .table-card:hover {
+.card:hover {
     transform: translateY(-5px);
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
@@ -68,171 +88,161 @@ body {
     width: calc(32% - 30px);
 }
 
-.table-card {
-    width: 30%;
-    text-align: center;
-}
-
-.menu-card h3, .table-card h3 {
-    margin: 0 0 10px;
-    font-size: 1.2em;
-}
-
 .menu-card h3 {
     color: #e67e22;
 }
 
-.menu-card p, .table-card p {
-    margin: 5px 0;
-    color: #666;
+.table-card {
+    width: 30%;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: var(--spacing-lg);
 }
 
-.menu-card p:last-child {
-    color: #3498db;
-    font-weight: bold;
-}
+/* Status Indicators */
+.available { background-color: #95ff95; }
+.occupied { background-color: lightcoral; }
 
-.table-card p {
-    margin-bottom: 20px;
-}
-
-.table-card a {
-    text-decoration: none;
-    /*color: #3498db;*/
-    font-weight: bold;
-}
-
-/* Availability Colors */
-.table-card.available {
-    background-color: #95ff95;
-}
-
-.table-card.occupied {
-    background-color: lightcoral;
-}
-
-/* Form Styles */
-form .menu-card, .edit-table-container {
+/* Forms */
+.form-container {
     width: 75%;
-    margin: 20px auto;
-    padding: 20px;
+    margin: var(--spacing-xl) auto;
+    padding: var(--spacing-xl);
 }
 
-form label {
-    display: block;
-    margin-top: 10px;
-    font-weight: bold;
-}
-
-form input, form textarea, form select {
-    width: calc(100% - 15px);
-    padding: 8px;
-    margin-top: 5px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-}
-
-form button {
-    background-color: #f6a828;
-    color: white;
-    border: none;
-    padding: 10px 20px;
-    margin-top: 15px;
-    border-radius: 4px;
-    cursor: pointer;
-    width: 100%;
-}
-
-form button:hover {
-    background-color: #d78c0e;
-}
-
-/* Edit Table Form Specific Styles */
-.edit-table-container {
+.form-container.small {
     max-width: 70%;
 }
 
-.edit-table-container h1 {
-    color: #2c3e50;
-    margin-bottom: 20px;
+label {
+    display: block;
+    margin-top: var(--spacing-lg);
+    font-weight: bold;
 }
 
-.edit-table-container form input[type="number"] {
+input, textarea, select {
+    width: calc(100% - 15px);
+    padding: var(--spacing-md);
+    margin-top: var(--spacing-sm);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-sm);
+}
+
+input[type="number"].narrow {
     width: 30%;
 }
 
-.edit-table-container a {
-    display: inline-block;
-    margin-top: 15px;
-    color: #3498db;
-    text-decoration: none;
-}
-
-.edit-table-container a:hover {
-    text-decoration: underline;
-}
-
-/* Tables Addition and Deletion buttons */
-.action-buttons {
-    text-align: center;
-    margin-top: 20px;
-}
-
+/* Buttons */
 .btn {
     display: inline-block;
-    padding: 10px 20px;
-    margin: 0 5px;
-    border-radius: 4px;
+    padding: var(--spacing-md) var(--spacing-xl);
+    border-radius: var(--border-radius-sm);
     text-decoration: none;
     font-weight: bold;
     transition: background-color 0.3s;
+    cursor: pointer;
+    border: none;
+    color: var(--white);
 }
 
-.add-btn {
-    background-color: #4CAF50;
-    color: white;
-    width: 30%;
-    font-size: 18px;
+.btn-block {
+    display: block;
+    width: 100%;
+    margin-top: var(--spacing-lg);
 }
 
-.add-btn:hover {
-    background-color: #45a049;
+.btn-primary {
+    background-color: var(--primary-color);
 }
 
-.delete-btn {
-    background-color: #f44336;
-    color: white;
+.btn-primary:hover {
+    background-color: var(--primary-dark);
 }
 
-.delete-btn:hover {
-    background-color: #da190b;
+.btn-secondary {
+    background-color: var(--secondary-color);
 }
 
-.table-deletion {
-    margin-top: 15px;
+.btn-secondary:hover {
+    background-color: var(--secondary-dark);
+}
+
+.btn-danger {
+    background-color: var(--danger-color);
+}
+
+.btn-danger:hover {
+    background-color: var(--danger-dark);
+}
+
+.btn-info {
+    background-color: var(--info-color);
+}
+
+.btn-info:hover {
+    background-color: var(--info-dark);
+}
+
+/* Navigation */
+.nav-links {
+    text-align: center;
+}
+
+/* Utility Classes */
+.text-center { text-align: center; }
+.mt-sm { margin-top: var(--spacing-sm); }
+.mt-md { margin-top: var(--spacing-md); }
+.mt-lg { margin-top: var(--spacing-lg); }
+.mt-xl { margin-top: var(--spacing-xl); }
+
+.flex-center {
     display: flex;
     justify-content: center;
-    gap: 10px;
+    gap: var(--spacing-md);
 }
 
-/*QR codes for manager side*/
-
+/* Special Components */
 .qr-code-container {
-    margin: 0 auto 15px auto;
+    margin: 0 auto var(--spacing-lg);
     text-align: center;
 }
 
 .qr-code {
     width: 120px;
     height: 120px;
-    border: 1px solid #ddd;
-
-    background: white;
+    border: 1px solid var(--border-color);
+    background: var(--white);
 }
 
-.table-card {
+.category-selection {
     display: flex;
-    flex-direction: column;
     align-items: center;
-    padding: 15px;
+    gap: var(--spacing-md);
+    margin: var(--spacing-md) 0;
 }
+
+.category-selection select,
+.category-selection input[type="text"] {
+    flex: 1;
+    width: auto;
+}
+
+.or-text {
+    color: #666;
+    font-style: italic;
+}
+
+input[type="file"] {
+    width: 100%;
+    padding: var(--spacing-md);
+    margin-top: var(--spacing-sm);
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-sm);
+    background: var(--white);
+}
+
+/* Text and Background Utilities */
+.text-white { color: var(--white); }
+.bg-white { background-color: var(--white); }
