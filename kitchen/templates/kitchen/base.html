@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kitchen Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #565f67;
+            --secondary-color: #343a40;
+            --accent-color: #36424c;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--primary-color);
+        }
+
+        .kitchen-header {
+            background-color: var(--secondary-color);
+            color: white;
+            padding: 1rem;
+            margin-bottom: 2rem;
+            border-radius: 0.5rem;
+        }
+
+        .order-card {
+            border-left: 5px solid var(--accent-color);
+            margin-bottom: 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .order-card:hover {
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+        }
+
+        .order-id {
+            font-weight: bold;
+            color: var(--accent-color);
+        }
+
+        .table-number {
+            background-color: var(--secondary-color);
+            color: white;
+            padding: 0.3rem 0.6rem;
+            border-radius: 0.25rem;
+            font-size: 0.9rem;
+        }
+
+        .btn-ready {
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+        }
+
+        .btn-ready:hover {
+            background-color: #d7730e;
+            color: white;
+        }
+
+        .waiting-count-badge {
+            background: linear-gradient(135deg, #edc832 0%, #8B4513 100%);
+            color: white;
+            padding: 0.35rem 0.7rem;
+            border-radius: 0.25rem;
+            font-size: 2rem;
+            margin-left: 0.5rem;
+            text-shadow: 0 1px 1px rgba(0,0,0,0.2);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .preparing-badge {
+            background-color: #17a2b8;
+            color: white;
+        }
+
+        .ready-badge {
+            background-color: #28a745;
+            color: white;
+        }
+
+        .nav-tabs .nav-link.active {
+            font-weight: bold;
+            border-bottom: 3px solid var(--accent-color);
+        }
+    </style>
+</head>
+<body>
+<div class="container-fluid py-3">
+    {% block content %}{% endblock %}
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
