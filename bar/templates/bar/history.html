@@ -1,0 +1,61 @@
+{% extends "bar/base.html" %}
+
+{% block content %}
+<div class="bar-header d-flex justify-content-between align-items-center">
+  <div class="d-flex align-items-center">
+    <i class="fas fa-glass-martini-alt fa-2x me-3"></i>
+    <h1 class="mb-0">DRINK HISTORY</h1>
+  </div>
+  <a href="{% url 'bar:dashboard' %}" class="btn btn-outline-light">
+    <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
+  </a>
+</div>
+
+<ul class="nav nav-tabs mb-4">
+  <li class="nav-item">
+    <a class="nav-link active" href="#">All Orders</a>
+  </li>
+</ul>
+
+<div class="table-responsive">
+  <table class="table table-hover">
+    <thead class="table-dark">
+    <tr>
+      <th>Order ID</th>
+      <th>Table</th>
+      <th>Drinks</th>
+      <th>Status</th>
+      <th>Time</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for order in completed_orders %}
+    {% with drink_items=order.get_bar_items %}
+    {% if drink_items %}
+    <tr>
+      <td>#{{ order.id }}</td>
+      <td>{{ order.table.table_number }}</td>
+      <td>
+        {% for item in drink_items %}
+        {{ item.selection.item.name }} (x{{ item.quantity }})<br>
+        {% endfor %}
+      </td>
+      <td>
+                                    <span class="badge 
+                                        {% if order.status == 'Completed' %}bg-success{% else %}bg-secondary{% endif %}">
+                                        {{ order.status }}
+                                    </span>
+      </td>
+      <td>{{ order.date_ordered|timesince }} ago</td>
+    </tr>
+    {% endif %}
+    {% endwith %}
+    {% empty %}
+    <tr>
+      <td colspan="5" class="text-center py-4 text-muted">No drink history yet</td>
+    </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}
