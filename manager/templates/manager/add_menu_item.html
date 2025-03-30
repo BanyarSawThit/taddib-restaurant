@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="{% static 'css/styles.css' %}">
 </head>
 <body>
+    <!--Header with Manager Access-->
     <div class="header">
         <h1>Add New Menu Item</h1>
         <h4>Access: Manager</h4>
@@ -17,6 +18,7 @@
     <div class="summary">
         <a href="{% url 'menu-items' %}">Back to Menu</a>
     </div>
+
     <div class="menu-edit-container">
         <form method="post" enctype="multipart/form-data">
             {% csrf_token %}

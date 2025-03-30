@@ -8,11 +8,18 @@
     <link rel="stylesheet" href="{% static 'css/styles.css' %}">
 </head>
 <body>
+    <!--Header with Manager Access-->
     <div class="header">
         <h1>Table Layout</h1>
         <h4>Access: Manager</h4>
     </div>
 
+    <div class="summary">
+        <h4>Total Tables: {{ tables|length }}</h4>
+        <h4>Available Tables: {{ available_tables }}</h4>
+    </div>
+
+    <!-- Navigation between table layouts and menu items -->
     <div class="navigation-links">
         <a href="{% url 'menu-items' %}" class="btn nav-btn">View Menu</a>
     </div>
@@ -37,7 +44,11 @@
             <p>Status: {{ table.availability|yesno:"Available,Occupied" }}</p>
             <a href="{% url 'edit-table' table.id %}">Edit</a>
             <div class="table-deletion">
-                <a href="{% url 'delete-table' table.id %}" class="btn delete-btn" onclick="return confirm('Are you sure you want to delete this table?')">Delete</a>
+                <form method="post" action="{% url 'delete-table' table.id %}" class="delete-form">
+                    {% csrf_token %}
+                    <button type="submit" class="btn delete-btn"
+                            onclick="return confirm('Are you sure you want to delete this table?')">Delete</button>
+                </form>
             </div>
         </div>
         {% endfor %}

@@ -7,7 +7,9 @@
     {% load static %}
     <link rel="stylesheet" href="{% static 'css/styles.css' %}">
 </head>
+
 <body>
+    <!--Header with Manager Access-->
     <div class="header">
         <h1>Menu Items</h1>
         <h4>Access: Manager</h4>
@@ -30,6 +32,7 @@
         {% for item in items %}
         <div class="menu-card">
             <h3>{{ item.name }}</h3>
+            <hr>
             <p>{{ item.description }}</p>
             <p>Price: ${{ item.base_price }}</p>
             <p>Category: {{ item.category.title }}</p>

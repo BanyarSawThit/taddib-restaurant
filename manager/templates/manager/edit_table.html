@@ -8,10 +8,12 @@
     <link rel="stylesheet" href="{% static 'css/styles.css' %}">
 </head>
 <body>
-<div class="header">
-    <h1>Table {{ table.table_number }}</h1>
-    <h4>Access: Manager</h4>
-</div>
+    <!--Header with Manager Access-->
+    <div class="header">
+        <h1>Table {{ table.table_number }}</h1>
+        <h4>Access: Manager</h4>
+    </div>
+
 <div class="edit-table-container">
     <form method="post">
         {% csrf_token %}
