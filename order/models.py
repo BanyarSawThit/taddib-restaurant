@@ -187,6 +187,30 @@ class Order(models.Model):
         """
         return f'Order {self.id} , Table {self.table.table_number} ({self.status})'
 
+    # Add these new status choices
+    STATUS_CHOICES = [
+        ('Waiting', 'Waiting'),
+        ('Preparing', 'Preparing'),
+        ('Ready', 'Ready'),
+        ('Served', 'Served'),
+    ]
+    kitchen_status = models.CharField(
+        max_length=50,
+        choices=STATUS_CHOICES,
+        default='Waiting'
+    )
+
+    bar_status = models.CharField(
+        max_length=50,
+        choices=STATUS_CHOICES,
+        default='Waiting'
+    )
+
+
+    # Add this method to count kitchen items
+    def get_kitchen_items(self):
+        return self.order_items.exclude(selection__item__category__title='Drinks')
+
 
 # ------------------------------------------------------------------------------
 # OrderItem Model: Represents an individual item within an order.
