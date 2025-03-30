@@ -19,9 +19,11 @@ def _handle_category_creation(request):
 
 # Table Views
 def table_layout(request):
-    """Display all tables in layout view"""
+    """Display all tables in layout view with summary statistics"""
+    tables = Table.objects.all()
     return render(request, 'manager/table_layout.html', {
-        'tables': Table.objects.all()
+        'tables': tables,
+        'available_tables': tables.filter(availability=True).count()
     })
 
 def edit_table(request, table_id):
