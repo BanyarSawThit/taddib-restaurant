@@ -1,0 +1,30 @@
+{% extends 'order/base.html' %}
+
+{% block body_class %}table-availability-page{% endblock %}
+
+{% block content %}
+    <h1>Table Status</h1>
+    <div class="container">
+        {% for table in tables %}
+        <div class="table-card">
+            <h3>Table {{ table.table_number }}</h3>
+            <div class="status-dot {% if table.availability %}available{% else %}occupied{% endif %}"></div>
+            <div class="status-label">
+                {% if table.availability %}
+                    Available
+                {% else %}
+                    Occupied
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Orders Section with arrow button -->
+    <div class="arrow-btn-container">
+        <div class="orders-text">Go to order status</div>
+        <a href="{% url 'order_status' %}">
+            <button class="arrow-btn"></button>
+        </a>
+    </div>
+{% endblock %}

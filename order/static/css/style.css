@@ -236,12 +236,13 @@ h3 {
     padding: 5px 10px;
     cursor: pointer;
 }
+
 /*customization_page button style ends here*/
 
 /*popup style*/
 .popup {
     position: fixed;
-    top:80%;
+    top: 80%;
     left: 50%;
     transform: translateX(-50%);
     background-color: #28a745;
@@ -253,6 +254,7 @@ h3 {
     z-index: 1000;
     animation: fadeIn 0.5s;
 }
+
 /*popup style end*/
 
 /* Sticky Cart at the Bottom-Left */
@@ -308,5 +310,202 @@ h3 {
     color: #000000;
 }
 
+/* Table Availability Page Styles */
+body.table-availability-page {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    margin: 0;
+    padding: 0;
+}
 
+/* Ensure table cards appear in rows and are scrollable */
+body.table-availability-page .container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    padding: 20px;
+    overflow-y: auto;
+    flex-grow: 1;
+}
+
+/* Table Card Styling */
+body.table-availability-page .table-card {
+    width: 150px;
+    height: 150px;
+    margin: 15px;
+    padding: 20px;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    text-align: center;
+}
+
+body.table-availability-page .table-card h3 {
+    margin: 10px 0;
+}
+
+body.table-availability-page .status-dot {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+}
+
+body.table-availability-page .available {
+    background-color: green;
+}
+
+body.table-availability-page .occupied {
+    background-color: red;
+}
+
+body.table-availability-page .status-label {
+    margin-top: 10px;
+}
+
+/* Sticky button */
+body.table-availability-page .arrow-btn-container {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 100;
+    text-align: center;
+}
+
+body.table-availability-page .orders-text {
+    font-size: 15px;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 10px;
+}
+
+body.table-availability-page .arrow-btn {
+    padding: 15px 25px;
+    font-size: 22px;
+    background-color: #28a745;
+    color: white;
+    border: none;
+    border-radius: 50px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
+    display: block;
+    position: relative;
+}
+
+body.table-availability-page .arrow-btn:hover {
+    background-color: #218838;
+}
+
+body.table-availability-page .arrow-btn:active {
+    transform: scale(0.95);
+}
+
+body.table-availability-page .arrow-btn:after {
+    content: "→";
+    font-size: 30px;
+    display: inline-block;
+    vertical-align: middle;
+}
+
+/* Specific Styles for Order Status Page */
+body.order-status-page {
+    background-color: #f7f7f7;
+}
+
+/* Order Cards Container */
+.order-cards-container {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr); /* 3 columns */
+    gap: 20px; /* Space between cards */
+    padding: 20px;
+    overflow-y: auto; /* Scrollable if content exceeds */
+    max-height: calc(100vh - 200px); /* Keeps the cards container within the viewport */
+    margin-top: 30px; /* Adjusted margin-top to move cards up */
+}
+
+.order-card {
+    background-color: white;
+    padding: 20px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    text-align: center;
+    transition: box-shadow 0.3s ease;
+    margin-bottom: 20px;
+}
+
+.order-card:hover {
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+}
+
+.order-card h3 {
+    margin: 10px 0;
+    font-size: 18px;
+}
+
+.order-card p {
+    margin: 5px 0;
+    font-size: 14px;
+    color: #555;
+}
+
+.status {
+    padding: 5px;
+    border-radius: 5px;
+}
+
+.pending {
+    background-color: yellow;
+}
+
+.completed {
+    background-color: green;
+    color: white;
+}
+
+/* Arrow Button Container */
+.arrow-btn-container {
+    text-align: center;
+    margin-top: 30px; /* Increased margin-top for spacing */
+    margin-bottom: 20px; /* Added space between arrow and the bottom */
+}
+
+.tables-text {
+    font-size: 15px;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 10px;
+}
+
+.arrow-btn {
+    margin: 0 auto;
+    padding: 15px 25px;
+    font-size: 22px;
+    background-color: #28a745;
+    color: white;
+    border: none;
+    border-radius: 50px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
+    display: block;
+    position: relative;
+}
+
+.arrow-btn:hover {
+    background-color: #218838;
+}
+
+.arrow-btn:active {
+    transform: scale(0.95);
+}
+
+.arrow-btn:after {
+    content: "←";
+    font-size: 30px;
+    display: inline-block;
+    vertical-align: middle;
+}
 
