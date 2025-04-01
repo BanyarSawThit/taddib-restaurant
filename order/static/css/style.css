@@ -95,19 +95,19 @@ html {
 
 /* Sidebar */
 .sidebar {
-    width: 80px;
-    background: white;
-    height: 100%;
+    width: 100%;
+    background: grey;
+    height: 5%;
     display: flex;
-    flex-direction: column;
+    /*flex-direction: row;*/
     align-items: center;
-    gap: 15px;
-    padding: 20px 10px 10px;
-    overflow-y: auto;
-    position: fixed;
-    left: 0;
-    top: 130px; /* Start below header */
-    bottom: 0;
+    gap: 5px;
+    /*padding: 20px 10px 10px;*/
+    /*overflow-y: auto;*/
+    /*position: fixed;*/
+    /*left: 0;*/
+    /*top: 130px; !* Start below header *!*/
+    /*bottom: 0;*/
 }
 
 .category-btn {
@@ -144,7 +144,7 @@ html {
 
 /* Menu Items Styling */
 .menu-container {
-    margin-left: 100px; /* Space for the sidebar */
+    /*margin-left: 100px; !* Space for the sidebar *!*/
     padding: 20px;
 }
 
@@ -162,6 +162,7 @@ html {
     margin: 10px;
     text-align: center;
     width: 200px;
+    /*width: 100%;*/
 }
 
 h2 {
@@ -308,5 +309,25 @@ h3 {
     color: #000000;
 }
 
+@media (max-width: 768px) {
+    .page-header {
+        padding: 10px 0; /* Smaller padding on mobile */
+    }
+    main.container {
+        margin-top: 60px; /* Adjust margin-top according to reduced header size */
+        height: calc(100vh - 60px);
+    }
+}
+
+@media (max-width: 480px) {
+    .sticky-cart {
+        width: 200px;
+        bottom: 10px;
+        padding: 10px;
+    }
+    .sticky-cart-text, .sticky-cart-action {
+        font-size: 14px;
+    }
+}
 
 
