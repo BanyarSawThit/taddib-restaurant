@@ -3,12 +3,14 @@
 {% block content %}
     <h2>Table Selection</h2>
     {% for table in tables %}
-        <article>
-            <h3><a href="{% url 'menu_page' table_id=table.pk %}">{{ table.table_number }}</a></h3>
-            {% if table.qr_code %}
-                <img src="{{ table.qr_code.url }}" alt="QR Code for Table {{ table.table_number }}">
-            {% endif %}
-            <p>Availability: {{ table.availability }}</p>
-        </article>
+            <article>
+                {% if table.qr_code %}
+                    <h3><a href="{% url 'menu_view' table_id=table.pk %}">Table Number: {{ table.table_number }}
+                        <div><img src="{{ table.qr_code.url }}" alt="QR Code for Table {{ table.table_number }}"></div>
+                    </a></h3>
+                {% endif %}
+                <p>Availability: {{ table.availability }}</p>
+            </article>
+
     {% endfor %}
 {% endblock %}

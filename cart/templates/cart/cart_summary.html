@@ -1,56 +1,19 @@
-{% extends 'base.html' %}
+{% extends 'order/base.html' %}
 
 {% block content %}
-<div class="container mt-4">
-    <h2 class="mb-4">Your Order Summary</h2>
-    {% if cart_items %}
-    <table class="table table-bordered table-striped">
-        <thead>
-            <tr>
-                <th>Item</th>
-                <th>Quantity</th>
-                <th>Customization</th>
-                <th>Price</th>
-                <th>Total</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for item in cart_items %}
-            <tr>
-                <td>{{ item.item.name }}</td>
-                <td>{{ item.quantity }}</td>
-                <td>
-                    {% if item.customization %}
-                        Spicy Level: {{ item.customization.spicy_level }}
-                    {% else %}
-                        No Customization
-                    {% endif %}
-                </td>
-                <td>${{ item.item.price }}</td>
-                <td>${{ item.get_total_price }}</td>
-                <td>
-                    <a href="{% url 'cart:cart_delete' item.item.id %}" class="btn btn-danger btn-sm">Remove</a>
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-        <tfoot>
-            <tr>
-                <th colspan="4">Grand Total</th>
-                <th colspan="2">${{ cart_total }}</th>
-            </tr>
-        </tfoot>
-    </table>
+    <h2>Cart Summary</h2>
+    {% for item in cart_items %}
+        <div>
+            <h3>{{ item.item.name }}</h3>
+            {% if item.customization %}
+                <p>Meat: {{ item.customization.meat }}</p>
+                <p>Spicy Level: {{ item.customization.spicy_level }}</p>
+            {% endif %}
+            <p>Quantity: {{ item.quantity }}</p>
+            <p>Total Price: ${{ item.total_price }}</p>
+        </div>
+        <hr>
+    {% endfor %}
 
-    <a href="{% url 'cart:cart_confirm' %}" class="btn btn-primary">Confirm Order</a>
-
-    {% else %}
-    <div class="alert alert-info" role="alert">
-        Your cart is currently empty.
-    </div>
-    {% endif %}
-
-    <a href="{% url 'order:index' %}" class="btn btn-secondary mt-3">Continue Shopping</a>
-</div>
+    <a href="{% url 'cart_confirm' %}">Confirm Order</a>
 {% endblock %}

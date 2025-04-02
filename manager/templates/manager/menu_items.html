@@ -1,0 +1,32 @@
+<!-- manager/templates/manager/menu_items.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Taddib House - Menu Management</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+</head>
+<body>
+    <div class="header">
+        <h1>Taddib House - Menu Items</h1>
+        <h4>Access: Manager</h4>
+    </div>
+    <div class="summary">
+        <h4>Total Items: {{ total_items }}</h4>
+        <h4>Total Categories: {{ total_categories }}</h4>
+    </div>
+    <div class="menu-container">
+        {% for item in items %}
+        <div class="menu-card">
+            <h3>{{ item.name }}</h3>
+            <p>{{ item.description }}</p>
+            <p>Price: ${{ item.base_price }}</p>
+            <p>Category: {{ item.category.title }}</p>
+            <a href="{% url 'edit-menu-item' item.id %}">Edit</a>  <!-- Edit link -->
+        </div>
+        {% endfor %}
+    </div>
+</body>
+</html>

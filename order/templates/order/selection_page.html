@@ -1,0 +1,150 @@
+{% extends 'order/base.html' %}
+
+{% block content %}
+    <h2>Selection Page</h2>
+
+    <!-- display item information -->
+    <article>
+        <img src="{{ item.image.url }}" alt="{{ item.name }}" width="100" height="100">
+        <h3>{{ item.name }}</h3>
+        <p>{{ item.description }}</p>
+    </article>
+
+    <form method="POST" action="{% url 'cart_add' table_id=table_id item_id=item.id %}">
+        {% csrf_token %}
+
+        <!-- Meat Type Selection -->
+        {% if item.has_meat_options %}
+            <h4>Meat Options:</h4>
+            <div class="button-group" id="meat-options">
+                <!-- Default option: No Meat -->
+                <button type="button" class="option-btn selected" data-value="" data-extra="0">
+                    No Meat
+                </button>
+                    {% for meat in item.get_meat_options %}
+                        <button
+                                type="button"
+                                class="option-btn"
+                                data-value="{{ meat.id }}"
+                                data-extra="{{ meat.extra_cost }}">
+                            {{ meat.name }} (+${{ meat.extra_cost }})
+                        </button>
+                {% endfor %}
+            </div>
+            <input type="hidden" name="meat_option" id="selected-meat" value="">
+        {% endif %}
+
+        <!-- Spicy Level Selection -->
+        {% if item.has_spicy_options and spicylevels %}
+            <h4>Spiciness Levels:</h4>
+            <div class="button-group" id="spicy-options">
+                <button type="button" class="option-btn" data-value="" data-extra="0">No Spicy</button>
+                {% for level in spicylevels %}
+                    <button type="button" class="option-btn" data-value="{{ level.id }}" data-extra="0">
+                        {{ level.name }}
+                    </button>
+                {% endfor %}
+            </div>
+            <input type="hidden" name="spicy_level" id="selected-spicy" value="">
+        {% endif %}
+
+        <!-- Quantity Selector (optional) -->
+      <div class="quantity-selector">
+          <button type="button" id="decrease-qty">-</button>
+          <span id="quantity">1</span>
+          <button type="button" id="increase-qty">+</button>
+      </div>
+      <input type="hidden" name="quantity" id="selected-quantity" value="1">
+
+      <!-- Display any popup messages -->
+      {% if messages %}
+          <div class="messages">
+              {% for message in messages %}
+                  <p>{{ message }}</p>
+              {% endfor %}
+          </div>
+      {% endif %}
+
+      <button type="submit">Add to Cart</button>
+  </form>
+
+  <!-- Price Display -->
+  <h3>Total Price: $<span id="total-price">{{ item.base_price }}</span></h3>
+
+
+
+    <script>
+  document.addEventListener('DOMContentLoaded', function () {
+      const basePrice = parseFloat("{{ item.base_price|default:0 }}".replace(',', '.')) || 0;
+      let selectedMeatPrice = 0;
+      let selectedSpicyPrice = 0;
+      let selectedQty = 1;
+      const totalPriceElement = document.getElementById("total-price");
+
+      // Update quantity hidden field when quantity changes
+      const quantityElement = document.getElementById("quantity");
+      const selectedQuantityInput = document.getElementById("selected-quantity");
+
+      function updatePrice() {
+          let totalPrice = (basePrice + selectedMeatPrice + selectedSpicyPrice) * selectedQty;
+          totalPriceElement.textContent = totalPrice.toFixed(2);
+          selectedQuantityInput.value = selectedQty;
+      }
+
+      function setupOptionButtons(groupId, hiddenInput, updateCallback) {
+          const buttons = document.querySelectorAll(`#${groupId} .option-btn`);
+          buttons.forEach(button => {
+              button.addEventListener("click", function () {
+                  // Remove 'selected' class from all buttons in group
+                  buttons.forEach(btn => btn.classList.remove("selected"));
+                  this.classList.add("selected");
+                  // Set hidden input value to the option's value (or empty string if no selection)
+                  hiddenInput.value = this.dataset.value;
+                  // Update extra price from this option
+                  updateCallback(parseFloat(this.dataset.extra) || 0);
+                  updatePrice();
+              });
+          });
+      }
+
+      const meatHiddenInput = document.getElementById("selected-meat");
+      if (document.getElementById("meat-options")) {
+          setupOptionButtons("meat-options", meatHiddenInput, function(newPrice) {
+              selectedMeatPrice = newPrice;
+          });
+      }
+
+      const spicyHiddenInput = document.getElementById("selected-spicy");
+      if (document.getElementById("spicy-options")) {
+          setupOptionButtons("spicy-options", spicyHiddenInput, function(newPrice) {
+              selectedSpicyPrice = newPrice;
+          });
+      }
+
+      document.getElementById("increase-qty").addEventListener("click", function () {
+          selectedQty++;
+          quantityElement.textContent = selectedQty;
+          updatePrice();
+      });
+
+      document.getElementById("decrease-qty").addEventListener("click", function () {
+          if (selectedQty > 1) {
+              selectedQty--;
+              quantityElement.textContent = selectedQty;
+              updatePrice();
+          }
+      });
+
+      updatePrice();
+
+      // Hide popup message after 3 seconds
+      const popupMessage = document.getElementById("popup-message");
+      if (popupMessage) {
+          setTimeout(function () {
+              popupMessage.style.display = "none";
+          }, 3000);
+      }
+  });
+  </script>
+
+{% endblock %}

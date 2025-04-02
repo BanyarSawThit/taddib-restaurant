@@ -1,60 +1,96 @@
-from django.shortcuts import render, redirect, get_object_or_404
-from django.views.decorators.http import require_POST
-from order.models import Item, Customization
-from .cart import Cart
+from django.shortcuts import render, redirect
+from django.contrib import messages
+from order.models import Item, Table, Customization, UserOrder, OrderItem
+from decimal import Decimal
 
-@require_POST
-def cart_add(request, table_id, item_id):
-    cart = Cart(request)
-    item = get_object_or_404(Item, id=item_id)
-
-    spicy_level = request.POST.get('spicy_level', '')
-    notes = request.POST.get('notes', '')
-
-    # Use filter().first() to avoid MultipleObjectsReturned error
-    customization = Customization.objects.filter(
-        item=item, spicy_level=spicy_level, notes=notes
-    ).first()
-
-    if customization is None:
-        customization = Customization.objects.create(
-            item=item, spicy_level=spicy_level, notes=notes
-        )
-
-    cart.add(item=item, customization=customization)
-
-    return redirect('order:table_menu', table_id=table_id)
-
-@require_POST
-def cart_update(request):
-    cart = Cart(request)
-    item_id = request.POST.get('item_id')
-    quantity = request.POST.get('quantity')
-
-    item = get_object_or_404(Item, id=item_id)
-
-    try:
-        quantity = int(quantity)
-        if quantity > 0:
-            cart.update(item=item, quantity=quantity)
-        else:
-            cart.remove(item)
-    except (ValueError, TypeError):
-        pass
-
-    return redirect('cart:cart_summary')
-
-def cart_delete(request, item_id):
-    cart = Cart(request)
-    item = get_object_or_404(Item, id=item_id)
-    cart.remove(item)
-    return redirect('cart:cart_summary')
-
+# Create your views here.
 def cart_summary(request):
-    cart = Cart(request)
-    return render(request, 'cart/summary.html', {'cart': cart})
+    cart = request.session.get('cart', {'items': []})
+
+    cart_items = []
+    for item in cart['items']:
+        item_obj = Item.objects.get(pk=item['item_id'])
+        customization_obj = Customization.objects.get(pk=item['customization_id']) if item['customization_id'] else None
+
+        cart_items.append({
+            'item': item_obj,
+            'customization': customization_obj,
+            'quantity': item['quantity'],
+            'total_price': item['total_price'],
+        })
+
+    return render(request, "cart/cart_summary.html", {'cart_items': cart_items})
+
+def cart_add(request, table_id, item_id):
+    item = Item.objects.get(pk=item_id)
+    table = Table.objects.get(pk=table_id)
+
+    meat = request.POST.get('meat', None)
+    spicy_level = request.POST.get('spicy_level', None)
+    quantity = int(request.POST.get('quantity', 1))
+
+    # find or create the customization
+    customization, created = Customization.objects.get_or_create(
+        item=item, meat=meat, spicy_level=spicy_level
+    )
+
+    # Convert float values to Decimal before multiplying
+    selected_meat_price = Decimal(str(request.POST.get("selected_meat_price", 0)))
+    selected_spicy_price = Decimal(str(request.POST.get("selected_spicy_price", 0)))
+    quantity = int(request.POST.get("quantity", 1))  # Ensure quantity is an integer
+
+    # calculate total price
+    extra_cost = customization.extra_cost if customization else Decimal(0)
+    # total_price = Decimal(item.base_price * extra_cost) * Decimal(quantity)
+    total_price = (item.base_price + selected_meat_price + selected_spicy_price) * Decimal(quantity)
+
+    if 'cart' not in request.session:
+        request.session['cart'] = {'table_id': table_id, 'items': []}
+
+    cart = request.session['cart']
+    cart['items'].append({
+        'item_id': item.id,
+        'customization_id': customization.id,
+        'quantity': quantity,
+        'total_price': float(total_price)  # Convert Decimal to float for session storage
+    })
+
+    request.session.modified = True # save session changes
+    messages.success(request, 'Item added to cart!')
+
+    return redirect('menu_page', table_id=table.id)
+
+def cart_delete(request):
+    pass
+def cart_update(request):
+    pass
 
 def cart_confirm(request):
-    cart = Cart(request)
-    cart.clear()
-    return redirect('order:index')
+    """ Convert session cart into a database order. """
+    cart = request.session.get('cart', None)
+
+    if not cart or not cart['items']:
+        messages.error(request, "Cart is empty!")
+        return redirect('menu_page', table_id=cart.get('table_id', 1))
+
+    table = Table.objects.get(pk=cart['table_id'])
+
+    # Create UserOrder
+    user_order = UserOrder.objects.create(table=table, status="Pending")
+
+    # Create OrderItems
+    for item in cart['items']:
+        customization = Customization.objects.get(pk=item['customization_id']) if item['customization_id'] else None
+        OrderItem.objects.create(
+            user_order=user_order,
+            customization=customization,
+            quantity=item['quantity'],
+            total_price=item['total_price']
+        )
+
+    # Clear session cart
+    del request.session['cart']
+    request.session.modified = True
+
+    messages.success(request, "Order placed successfully!")
+    return redirect('menu_page', table_id=table.id)
