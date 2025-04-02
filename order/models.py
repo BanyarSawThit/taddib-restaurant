@@ -1,11 +1,11 @@
 import qrcode
+from io import BytesIO
 from django.db import models
 from django.core.files.base import ContentFile
-from io import BytesIO
 
-# ------------------------------------------------------------------------------
+# --------------------------------------------------------------------------
 # Table Model
-# ------------------------------------------------------------------------------
+# --------------------------------------------------------------------------
 class Table(models.Model):
     table_number = models.PositiveIntegerField(unique=True)
     availability = models.BooleanField(default=True)
@@ -28,10 +28,9 @@ class Table(models.Model):
     def __str__(self):
         return f"Table {self.table_number}"
 
-
-# ------------------------------------------------------------------------------
+# --------------------------------------------------------------------------
 # Category Model
-# ------------------------------------------------------------------------------
+# --------------------------------------------------------------------------
 class Category(models.Model):
     title = models.CharField(max_length=100)
     image = models.ImageField(blank=True, null=True)
@@ -42,9 +41,9 @@ class Category(models.Model):
     def __str__(self):
         return self.title
 
-# ------------------------------------------------------------------------------
+# --------------------------------------------------------------------------
 # Menu Item Model
-# ------------------------------------------------------------------------------
+# --------------------------------------------------------------------------
 class Item(models.Model):
     name = models.CharField(max_length=100)
     description = models.TextField(null=True, blank=True)
@@ -57,44 +56,79 @@ class Item(models.Model):
     def __str__(self):
         return f"{self.name} , {self.category.title}"
 
+# --------------------------------------------------------------------------
+# Customization Model
+# --------------------------------------------------------------------------
 class Customization(models.Model):
     item = models.ForeignKey(Item, on_delete=models.CASCADE, related_name='customizations')
-    meat = models.CharField(max_length=50, choices=[('Beef', 'Beef'), ('Chicken', 'Chicken')], blank=True, null=True)
-    spicy_level = models.CharField(max_length=50, choices=[('Mild', 'Mild'), ('Medium', 'Medium'), ('High', 'High')])
+    meat = models.CharField(
+        max_length=50,
+        choices=[('Beef', 'Beef'), ('Chicken', 'Chicken')]
+    )
+    spicy_level = models.CharField(
+        max_length=50,
+        choices=[('Mild', 'Mild'), ('Medium', 'Medium'), ('High', 'High')]
+    )
     extra_cost = models.DecimalField(max_digits=5, decimal_places=2, default=0.00)
 
     def __str__(self):
-        return f'{self.item.name} ( meat-{self.meat} , spicy-{self.spicy_level})'
+        return f'{self.item.name} (meat-{self.meat} , spicy-{self.spicy_level})'
 
+# --------------------------------------------------------------------------
+# UserOrder Model
+# --------------------------------------------------------------------------
 class UserOrder(models.Model):
     table = models.ForeignKey(Table, on_delete=models.CASCADE)
     date_ordered = models.DateTimeField(auto_now_add=True)
-    status = models.CharField(max_length=50, choices=[('Pending', 'Pending'), ('Completed', 'Completed')])
+    status = models.CharField(
+        max_length=50,
+        choices=[('Pending', 'Pending'), ('Completed', 'Completed')]
+    )
 
     def __str__(self):
         return f'Order {self.id} , Table {self.table.table_number} ({self.status})'
 
+# --------------------------------------------------------------------------
+# OrderItem Model
+# --------------------------------------------------------------------------
 class OrderItem(models.Model):
     user_order = models.ForeignKey(UserOrder, on_delete=models.CASCADE)
-    customization= models.ForeignKey(Customization, on_delete=models.CASCADE)
+    customization = models.ForeignKey(Customization, on_delete=models.CASCADE)
     quantity = models.IntegerField()
     total_price = models.DecimalField(max_digits=10, decimal_places=2)
 
     def __str__(self):
         return f"{self.customization.item.name} x {self.quantity} - Order {self.user_order.id}"
 
+# --------------------------------------------------------------------------
+# Selection Model
+# --------------------------------------------------------------------------
+class Selection(models.Model):
+    item = models.ForeignKey(Item, on_delete=models.CASCADE, null=True, blank=True)
+    meat_option = models.ForeignKey('MeatOption', on_delete=models.SET_NULL, null=True, blank=True)
+    spicy_level = models.ForeignKey('SpicyLevel', on_delete=models.SET_NULL, null=True, blank=True)
 
-class Selection:
-    pass
+    def __str__(self):
+        return f"Selection for {self.item.name}" if self.item else "Selection"
 
+# --------------------------------------------------------------------------
+# MeatOption Model
+# --------------------------------------------------------------------------
+class MeatOption(models.Model):
+    name = models.CharField(max_length=50)
 
+    def __str__(self):
+        return self.name
+
+# --------------------------------------------------------------------------
+# SpicyLevel Model
+# --------------------------------------------------------------------------
+class SpicyLevel(models.Model):
+    level = models.CharField(max_length=50)
+
+    def __str__(self):
+        return self.level
+
+# Placeholders (if needed)
 class Order:
-    pass
-
-
-class MeatOption:
-    pass
-
-
-class SpicyLevel:
     pass
