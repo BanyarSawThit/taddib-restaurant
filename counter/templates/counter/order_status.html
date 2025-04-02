@@ -1,0 +1,32 @@
+<!-- order_status.html -->
+{% extends 'order/base.html' %}
+
+{% block content %}
+<h1>Order Status</h1>
+
+<div class="order-cards-container">
+    {% for order in orders %}
+        <div class="order-card">
+            <h3>Order ID: {{ order.id }}</h3>
+            <p>Table Number: {{ order.table.table_number }}</p>
+            <p>Date Ordered: {{ order.date_ordered }}</p>
+            <p>
+                <span class="status {% if order.status == 'Pending' %}pending{% else %}completed{% endif %}">
+                    {{ order.status }}
+                </span>
+            </p>
+            <!-- Link to view the items of the particular order -->
+            <a href="{% url 'order_items' order.id %}">
+                <button class="arrow-btn">View Order Items</button>
+            </a>
+        </div>
+    {% endfor %}
+</div>
+
+<div class="arrow-btn-container">
+    <div class="tables-text">Tables</div>
+    <a href="{% url 'table_availability' %}">
+        <button class="arrow-btn"></button>
+    </a>
+</div>
+{% endblock %}

@@ -1,0 +1,30 @@
+<!-- order_items.html -->
+{% extends 'order/base.html' %}
+
+{% block content %}
+<h2>Order Items for Order #{{ order.id }} (Table #{{ order.table.table_number }})</h2>
+
+<div class="order-items-list">
+    {% for order_item in order.order_items.all %}
+        <div class="order-item">
+            <h3>{{ order_item.selection.item.name }}</h3>
+            <p>Selection:
+                {% if order_item.selection.meat_option %}
+                    {{ order_item.selection.meat_option.name }}
+                {% else %}
+                    No Meat
+                {% endif %}
+                {% if order_item.selection.spicy_level %}
+                    , {{ order_item.selection.spicy_level.name }}
+                {% else %}
+                    No Spicy
+                {% endif %}
+            </p>
+            <p>Quantity: {{ order_item.quantity }}</p>
+            <p>Total Price: ${{ order_item.total_price }}</p>
+        </div>
+    {% endfor %}
+</div>
+
+<a href="{% url 'order_status' %}">Back to Order Status</a>
+{% endblock %}
