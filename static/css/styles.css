@@ -1,0 +1,166 @@
+:root {
+    /* Color Palette */
+    --primary: #f6a828;
+    --primary-dark: #d7730e;
+    --success: #4CAF50;
+    --success-dark: #45a049;
+    --danger: #f44336;
+    --danger-dark: #da190b;
+    --info: #3498db;
+    --info-dark: #2980b9;
+    --text: #5e5d5d;
+    --light: #f9f9f9;
+    --white: #ffffff;
+    --border: #ddd;
+
+    /* Spacing Scale */
+    --space-xs: 4px;
+    --space-sm: 8px;
+    --space-md: 16px;
+    --space-lg: 24px;
+    --space-xl: 32px;
+
+    /* Border Radius */
+    --radius-sm: 4px;
+    --radius-md: 8px;
+
+    /* Shadows */
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.12);
+    --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+    --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+
+    /* Transitions */
+    --transition: all 0.2s ease;
+}
+
+/* Base & Layout */
+body {
+    font-family: Arial, sans-serif;
+    background: var(--light);
+    color: var(--text);
+    margin: 0;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: var(--space-lg);
+}
+
+.grid {
+    display: grid;
+    gap: var(--space-md);
+}
+
+.flex {
+    display: flex;
+    gap: var(--space-sm);
+}
+
+/* Cards */
+.card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-sm);
+    transition: var(--transition);
+    overflow: hidden;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+/* Menu Card Specific */
+.menu-card {
+    display: grid;
+    grid-template-rows: 1fr auto;
+    min-height: 250px;
+}
+
+.card-content {
+    padding: var(--space-md);
+}
+
+.card-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-sm);
+    padding: var(--space-md);
+    margin-top: auto;
+}
+
+/* Buttons */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-sm) var(--space-md);
+    border-radius: var(--radius-sm);
+    font-weight: 600;
+    text-align: center;
+    cursor: pointer;
+    transition: var(--transition);
+    border: none;
+    color: var(--white);
+}
+
+.btn--block {
+    display: block;
+    width: 100%;
+}
+
+.btn--edit {
+    background: var(--info);
+}
+
+.btn--edit:hover {
+    background: var(--info-dark);
+}
+
+.btn--delete {
+    background: var(--danger);
+}
+
+.btn--delete:hover {
+    background: var(--danger-dark);
+}
+
+/* Utilities */
+.text-center {
+    text-align: center;
+}
+
+.mt-auto {
+    margin-top: auto;
+}
+
+.shadow {
+    box-shadow: var(--shadow-sm);
+}
+
+/* Status Indicators */
+.status-available {
+    background: #95ff95;
+}
+
+.status-occupied {
+    background: lightcoral;
+}
+
+/* Forms */
+.form-control {
+    width: 100%;
+    padding: var(--space-sm);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+}
+
+/* QR Code */
+.qr-code {
+    width: 120px;
+    height: 120px;
+    border: 1px solid var(--border);
+    background: var(--white);
+}
