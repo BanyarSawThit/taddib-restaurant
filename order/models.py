@@ -3,7 +3,8 @@ import qrcode
 from django.db import models
 from django.core.files.base import ContentFile
 from io import BytesIO
-
+from django.conf import settings
+from django.urls import reverse
 # ------------------------------------------------------------------------------
 # Table Model: Represents a dining table in the restaurant.
 # ------------------------------------------------------------------------------
@@ -215,3 +216,52 @@ class OrderItem(models.Model):
         Displays the item's name, quantity, and the associated order's ID.
         """
         return f"{self.selection.item.name} x {self.quantity} (Order {self.order.pk})"
+
+
+# models.py
+class Payment(models.Model):
+    PAYMENT_METHODS = [
+        ('card', 'Credit/Debit Card'),
+        ('cash', 'Cash'),
+        ('paynow', 'PayNow'),
+    ]
+
+    STATUS_CHOICES = [
+        ('pending', 'Pending'),
+        ('completed', 'Completed'),
+        ('failed', 'Failed'),
+        ('refunded', 'Refunded'),
+    ]
+
+    order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='payments',  null=True, blank=True)
+    amount = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    payment_method = models.CharField(max_length=20, choices=PAYMENT_METHODS, null=True, blank=True)
+    stripe_charge_id = models.CharField(max_length=100, blank=True, null=True)
+    customer_phone = models.CharField(max_length=20, blank=True, null=True)
+    timestamp = models.DateTimeField(auto_now_add=True, null=True, blank=True)
+    qr_code = models.ImageField(upload_to='paynow_qr/', blank=True, null=True)
+    billing_email = models.EmailField(blank=True, null=True)
+    notes = models.TextField(blank=True, null=True)
+
+    class Meta:
+        ordering = ['-timestamp']
+        verbose_name = 'Payment'
+        verbose_name_plural = 'Payments'
+
+    def __str__(self):
+        return f"Payment #{self.id} for Order #{self.order.id} ({self.get_status_display()})"
+
+    def save(self, *args, **kwargs):
+        """Auto-set amount if not provided"""
+        if not self.amount and self.order:
+            self.amount = self.order.get_total()
+        super().save(*args, **kwargs)
+
+    def generate_paynow_qr(self):
+        """Generate QR code for PayNow payments"""
+        if self.payment_method == 'paynow' and not self.qr_code:
+            qr_img = qrcode.make(f"PAYNOW|{self.order.id}|{self.amount}")
+            buffer = BytesIO()
+            qr_img.save(buffer, format="PNG")
+            self.qr_code.save(f'paynow_{self.order.id}.png', ContentFile(buffer.getvalue()))

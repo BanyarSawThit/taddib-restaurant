@@ -1,0 +1,425 @@
+{% extends "order/base.html" %}
+
+{% block content %}
+<div class="cash-receipt-container">
+    {% if messages %}
+    <div class="receipt-messages">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}">
+            <i class="fas {% if message.tags == 'success' %}fa-check-circle{% else %}fa-exclamation-circle{% endif %}"></i>
+            {{ message }}
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <div class="receipt-header">
+        <div class="restaurant-logo">
+            <i class="fas fa-utensils"></i>
+            <h2>TADDIB Restaurant</h2>
+        </div>
+        <div class="receipt-meta">
+            <p><strong>Order #{{ order.id }}</strong></p>
+            <p>{{ payment.timestamp|date:"F j, Y H:i" }}</p>
+            <p>Table: {{ order.table.number }}</p>
+        </div>
+    </div>
+
+    <div class="receipt-body">
+        <div class="payment-method">
+            <div class="payment-icon">
+                <i class="fas fa-money-bill-wave"></i>
+            </div>
+            <h3>Cash Payment Pending</h3>
+            <p class="payment-note">Please present this receipt at the counter</p>
+        </div>
+
+        <div class="order-summary">
+            <h4 class="section-title">Order Summary</h4>
+            <table class="order-items">
+                {% for item in order.order_items.all %}
+                <tr>
+                    <td class="item-details">
+                        <div class="item-name">
+                            <strong>{{ item.selection.item.name }}</strong>
+                            <span class="item-quantity">x{{ item.quantity }}</span>
+                        </div>
+                        <div class="item-options">
+                            {% if item.selection.item.has_meat_options %}
+                                <div>Meat: {{ item.selection.meat_option.name|default:"None" }}</div>
+                            {% endif %}
+                            {% if item.selection.item.has_spicy_options and item.selection.spicy_level %}
+                                <div>Spicy Level: {{ item.selection.spicy_level.name }}</div>
+                            {% endif %}
+                        </div>
+                    </td>
+                    <td class="item-price">${{ item.total_price }}</td>
+                </tr>
+                {% endfor %}
+            </table>
+        </div>
+
+        <div class="total-amount">
+            <div class="total-line">
+                <span>Subtotal:</span>
+                <span>${{ order.get_subtotal }}</span>
+            </div>
+            <div class="total-line">
+                <span>Tax (7%):</span>
+                <span>${{ order.get_tax }}</span>
+            </div>
+            <div class="total-line grand-total">
+                <span>Total Amount:</span>
+                <span>${{ order.get_total }}</span>
+            </div>
+        </div>
+
+        <div class="payment-instructions">
+            <div class="instructions-icon">
+                <i class="fas fa-info-circle"></i>
+            </div>
+            <h4>Payment Instructions</h4>
+            <ul>
+                <li>Please pay the exact amount to the cashier</li>
+                <li>Your order will be prepared after payment</li>
+                <li>Show this receipt for verification</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="receipt-footer">
+        <p class="thank-you">Thank you for dining with us!</p>
+        <div class="receipt-actions">
+            <button onclick="window.print()" class="btn btn-print">
+                <i class="fas fa-print"></i> Print Receipt
+            </button>
+            <a href="{% url 'table_view' %}" class="btn btn-primary">
+                <i class="fas fa-home"></i> Return to Home
+            </a>
+        </div>
+        <div class="receipt-qr">
+            <div class="qr-placeholder"></div>
+            <small>Scan for order tracking</small>
+        </div>
+    </div>
+</div>
+
+<style>
+    :root {
+        --primary-color: #28a745;
+        --secondary-color: #6c757d;
+        --accent-color: #ffc107;
+        --dark-color: #343a40;
+        --light-color: #f8f9fa;
+        --success-color: #28a745;
+        --danger-color: #dc3545;
+        --border-radius: 8px;
+        --box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    .receipt-messages {
+        margin-bottom: 1.5rem;
+    }
+
+    .alert {
+        padding: 1rem;
+        border-radius: var(--border-radius);
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        margin-bottom: 1rem;
+    }
+
+    .alert-success {
+        background-color: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+    }
+
+    .alert-error {
+        background-color: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+    }
+
+    .cash-receipt-container {
+        max-width: 500px;
+        margin: 2rem auto;
+        padding: 2rem;
+        background: white;
+        border: 1px solid #ddd;
+        border-radius: var(--border-radius);
+        box-shadow: var(--box-shadow);
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        color: #333;
+    }
+
+    .receipt-header {
+        text-align: center;
+        margin-bottom: 2rem;
+        padding-bottom: 1.5rem;
+        border-bottom: 2px dashed #eee;
+    }
+
+    .restaurant-logo {
+        margin-bottom: 1rem;
+    }
+
+    .restaurant-logo i {
+        font-size: 2.5rem;
+        color: var(--primary-color);
+    }
+
+    .receipt-header h2 {
+        margin: 0.5rem 0;
+        color: var(--dark-color);
+        font-size: 1.8rem;
+    }
+
+    .receipt-meta {
+        margin-top: 1rem;
+        font-size: 0.9rem;
+        color: var(--secondary-color);
+    }
+
+    .payment-method {
+        text-align: center;
+        margin: 2rem 0;
+        padding: 1.5rem;
+        background: #f8f9fa;
+        border-radius: var(--border-radius);
+    }
+
+    .payment-icon i {
+        font-size: 3rem;
+        color: var(--primary-color);
+        margin-bottom: 1rem;
+    }
+
+    .payment-method h3 {
+        margin: 0.5rem 0;
+        color: var(--dark-color);
+    }
+
+    .payment-note {
+        color: var(--secondary-color);
+        margin: 0;
+    }
+
+    .section-title {
+        margin-bottom: 1rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 1px solid #eee;
+        color: var(--dark-color);
+    }
+
+    .order-items {
+        width: 100%;
+        margin: 1.5rem 0;
+        border-collapse: collapse;
+    }
+
+    .item-details {
+        padding: 0.75rem 0;
+        vertical-align: top;
+    }
+
+    .item-name {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 0.25rem;
+    }
+
+    .item-quantity {
+        color: var(--secondary-color);
+        font-weight: normal;
+    }
+
+    .item-options {
+        font-size: 0.85rem;
+        color: var(--secondary-color);
+        line-height: 1.4;
+    }
+
+    .item-options div {
+        margin-top: 0.25rem;
+    }
+
+    .item-price {
+        padding: 0.75rem 0;
+        text-align: right;
+        vertical-align: top;
+        white-space: nowrap;
+    }
+
+    .total-amount {
+        margin: 2rem 0;
+        padding-top: 1rem;
+        border-top: 2px solid var(--dark-color);
+    }
+
+    .total-line {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 0.5rem;
+    }
+
+    .grand-total {
+        font-size: 1.2rem;
+        font-weight: bold;
+        margin-top: 1rem;
+        padding-top: 0.5rem;
+        border-top: 1px dashed #ccc;
+    }
+
+    .payment-instructions {
+        margin: 2rem 0;
+        padding: 1.5rem;
+        background: #f8f9fa;
+        border-radius: var(--border-radius);
+        text-align: center;
+    }
+
+    .instructions-icon i {
+        font-size: 2rem;
+        color: var(--accent-color);
+        margin-bottom: 1rem;
+    }
+
+    .payment-instructions h4 {
+        margin-top: 0;
+        color: var(--dark-color);
+    }
+
+    .payment-instructions ul {
+        list-style: none;
+        padding: 0;
+        margin: 1rem 0 0;
+        text-align: left;
+    }
+
+    .payment-instructions li {
+        margin-bottom: 0.5rem;
+        padding-left: 1.5rem;
+        position: relative;
+    }
+
+    .payment-instructions li:before {
+        content: "•";
+        position: absolute;
+        left: 0;
+        color: var(--accent-color);
+    }
+
+    .receipt-footer {
+        margin-top: 2rem;
+        text-align: center;
+    }
+
+    .thank-you {
+        font-size: 1.1rem;
+        color: var(--primary-color);
+        margin-bottom: 1.5rem;
+    }
+
+    .receipt-actions {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        margin-bottom: 1.5rem;
+    }
+
+    .btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.75rem 1.25rem;
+        border-radius: var(--border-radius);
+        text-decoration: none;
+        font-weight: 500;
+        transition: all 0.2s;
+        border: none;
+        cursor: pointer;
+    }
+
+    .btn-primary {
+        background: var(--primary-color);
+        color: white;
+    }
+
+    .btn-primary:hover {
+        background: #218838;
+    }
+
+    .btn-print {
+        background: var(--secondary-color);
+        color: white;
+    }
+
+    .btn-print:hover {
+        background: #5a6268;
+    }
+
+    .receipt-qr {
+        margin-top: 2rem;
+        padding-top: 1.5rem;
+        border-top: 1px dashed #eee;
+    }
+
+    .qr-placeholder {
+        width: 120px;
+        height: 120px;
+        margin: 0 auto;
+        background: #eee;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--secondary-color);
+        border-radius: var(--border-radius);
+    }
+
+    .receipt-qr small {
+        display: block;
+        margin-top: 0.5rem;
+        color: var(--secondary-color);
+    }
+
+    @media (max-width: 768px) {
+        .cash-receipt-container {
+            width: 95%;
+            margin: 1rem auto;
+            padding: 1.5rem;
+            box-shadow: none;
+            border: none;
+        }
+
+        .receipt-actions {
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .btn {
+            width: 100%;
+            justify-content: center;
+        }
+    }
+
+    @media print {
+        .cash-receipt-container {
+            max-width: 100%;
+            margin: 0;
+            padding: 0;
+            border: none;
+            box-shadow: none;
+        }
+
+        .receipt-actions {
+            display: none;
+        }
+
+        .receipt-qr {
+            display: none;
+        }
+    }
+</style>
+{% endblock %}
