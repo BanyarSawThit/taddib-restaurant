@@ -11,7 +11,6 @@
     </nav>
 
     <div class="menu-container">
-        <h3>Table {{ table.table_number }}</h3>
         {% for category in categories %}
             <div class="category-section" id="category-{{ category.id }}">
                 <h3>{{ category.title }}</h3>
@@ -30,7 +29,6 @@
                 </div>
             </div>
         {% endfor %}
-
     </div>
 
     <!-- Sticky Cart Summary at the Bottom-Left -->
