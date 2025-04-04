@@ -6,33 +6,37 @@
     {% load static %}
     <link rel="stylesheet" href="{% static 'counter/styles.css' %}">
 </head>
-<body>
+<body class="table-availability-page">
     <h1>Table Availability</h1>
-    <table>
-        <thead>
-            <tr>
-                <th>Table Number</th>
-                <th>Availability</th>
-                <th>Action</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for table in tables %}
-            <tr id="table-row-{{ table.id }}">
-                <td>{{ table.table_number }}</td>
-                <td class="availability-status">{{ table.availability|yesno:"Available,Occupied" }}</td>
-                <td>
-                    <button class="toggle-status" data-table-id="{{ table.id }}">
-                        Toggle Status
-                    </button>
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+
+    <!-- Table Container for better styling -->
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>Table Number</th>
+                    <th>Availability</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for table in tables %}
+                    <tr id="table-row-{{ table.id }}">
+                        <td>{{ table.table_number }}</td>
+                        <td class="availability-status">{{ table.availability|yesno:"Available,Occupied" }}</td>
+                        <td>
+                            <button class="toggle-status" data-table-id="{{ table.id }}">
+                                Toggle Status
+                            </button>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
 
     <div class="navigation-links">
-        <a href="{% url 'order_management' %}" class="btn nav-btn">View Orders</a>
+        <a href="{% url 'counter:order_management' %}" class="btn nav-btn">View Orders</a>
     </div>
 
     <script>
@@ -54,7 +58,7 @@
                             'Content-Type': 'application/x-www-form-urlencoded',
                             'X-CSRFToken': '{{ csrf_token }}'
                         },
-                        body: `availability=${newStatus}`
+                        body: `availability=${newStatus}`,
                     })
                     .then(response => response.json())
                     .then(data => {
