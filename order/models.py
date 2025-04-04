@@ -180,12 +180,27 @@ class Order(models.Model):
         """
         return sum(item.total_price for item in self.order_items.all())
 
+    kitchen_status_choices = [
+        ('Waiting', 'Waiting'),
+        ('Preparing', 'Preparing'),
+        ('Ready', 'Ready'),
+    ]
+    kitchen_status = models.CharField(max_length=50, choices=kitchen_status_choices, default='Waiting')
+
+    bar_status = models.CharField(max_length=50, choices=kitchen_status_choices, default='Waiting')
+
+    def get_kitchen_items(self):
+        return self.order_items.exclude(selection__item__category__title='Drink')
+
+    def get_bar_items(self):
+        return self.order_items.filter(selection__item__category__title='Drink')
+
     def __str__(self):
         """
         String representation of the Order.
         Includes the order ID, table number, and current status.
         """
-        return f'Order {self.id} , Table {self.table.table_number} ({self.status})'
+        return f'Order {self.id} , Table {self.table.table_number} ({self.status}), kitchen ({self.kitchen_status}), bar ({self.bar_status})'
 
 
 # ------------------------------------------------------------------------------
