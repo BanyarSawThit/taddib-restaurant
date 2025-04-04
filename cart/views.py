@@ -158,4 +158,4 @@ def cart_confirm(request):
     request.session.modified = True
 
     messages.success(request, "Order placed successfully!")
-    return redirect('menu_
+    return redirect('menu_view', table_id=table_id)
