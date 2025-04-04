@@ -8,16 +8,15 @@
     <link rel="stylesheet" href="{% static 'css/styles.css' %}">
 </head>
 <body>
-<div class="header">
-    <h1>Table {{ table.table_number }}</h1>
-    <h4>Access: Manager</h4>
-</div>
+    <!--Header with Manager Access-->
+    <div class="header">
+        <h1>Table {{ table.table_number }}</h1>
+        <h4>Access: Manager</h4>
+    </div>
+
 <div class="edit-table-container">
     <form method="post">
         {% csrf_token %}
-        <label for="table_number">Table Number:</label>
-        <input type="number" id="table_number" name="table_number" value="{{ table.table_number }}" required>
-        <br>
         <label for="availability">Availability:</label>
         <input type="checkbox" id="availability" name="availability" {% if table.availability %}checked{% endif %}>
         <br>

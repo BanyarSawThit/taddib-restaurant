@@ -12,10 +12,10 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 
 from pathlib import Path
 import os
+from django.core.management.commands.runserver import Command as RunserverCommand
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
@@ -27,7 +27,6 @@ SECRET_KEY = 'django-insecure-t%(hi*^uguof@b@d^g9q5+vu-v7x&9de66yu5=+dkq=43oc*hh
 DEBUG = True
 
 ALLOWED_HOSTS = ['localhost', '127.0.0.1', '.pythonanywhere.com']
-
 
 # Application definition
 
@@ -74,7 +73,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'restaurant.wsgi.application'
 
-
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
@@ -84,7 +82,6 @@ DATABASES = {
         'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
@@ -104,7 +101,6 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-
 # Internationalization
 # https://docs.djangoproject.com/en/5.1/topics/i18n/
 
@@ -115,7 +111,6 @@ TIME_ZONE = 'Asia/Singapore'
 USE_I18N = True
 
 USE_TZ = True
-
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
@@ -130,3 +125,22 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+###
+# Stripe settings
+STRIPE_PUBLIC_KEY = 'your_publishable_key_here'  # From Stripe dashboard
+STRIPE_SECRET_KEY = 'your_secret_key_here'  # From Stripe dashboard
+STRIPE_CURRENCY = 'lkr'
+ENABLE_PAYNOW = True
+
+
+class Command(RunserverCommand):
+    def inner_run(self, *args, **options):
+        # Print a clickable URL for terminals that support it
+        print("\033]8;;http://127.0.0.1:8000/\033\\➜ Click here: http://127.0.0.1:8000/\033]8;;\033\\")
+
+        # Automatically open browser (only if not running in test mode)
+        if not options['nostatic'] and not options['insecure_serving']:
+            webbrowser.open_new('http://127.0.0.1:8000/')
+
+        super().inner_run(*args, **options)

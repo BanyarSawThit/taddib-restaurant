@@ -1,0 +1,46 @@
+{% extends "order/base.html" %}
+
+{% block content %}
+<div class="payment-success-container">
+    <div class="success-icon">
+        <i class="fas fa-check-circle"></i>
+    </div>
+    <h2>Payment Successful!</h2>
+    <p>Thank you for your payment for Order #{{ order.id }}</p>
+    <p>Amount: ${{ order.get_total }}</p>
+    <a href="{% url 'table_view' %}" class="return-button">Return to Home</a>
+</div>
+
+<style>
+    .payment-success-container {
+        max-width: 500px;
+        margin: 2rem auto;
+        padding: 2rem;
+        text-align: center;
+        background: #fff;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .success-icon {
+        color: #2ecc71;
+        font-size: 4rem;
+        margin-bottom: 1rem;
+    }
+
+    .return-button {
+        display: inline-block;
+        margin-top: 1rem;
+        padding: 0.5rem 1rem;
+        background: #3498db;
+        color: white;
+        text-decoration: none;
+        border-radius: 4px;
+        transition: background 0.2s;
+    }
+
+    .return-button:hover {
+        background: #2980b9;
+    }
+</style>
+{% endblock %}

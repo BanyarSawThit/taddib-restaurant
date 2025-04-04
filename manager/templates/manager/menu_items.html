@@ -1,4 +1,3 @@
-<!-- manager/templates/manager/menu_items.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -8,25 +7,47 @@
     {% load static %}
     <link rel="stylesheet" href="{% static 'css/styles.css' %}">
 </head>
+
 <body>
+    <!--Header with Manager Access-->
     <div class="header">
-        <h1>Taddib House - Menu Items</h1>
+        <h1>Menu Items</h1>
         <h4>Access: Manager</h4>
     </div>
+
     <div class="summary">
         <h4>Total Items: {{ total_items }}</h4>
         <h4>Total Categories: {{ total_categories }}</h4>
     </div>
+
+    <div class="navigation-links">
+        <a href="{% url 'table-layout' %}" class="btn nav-btn">View Tables</a>
+    </div>
+
+    <div class="action-buttons">
+        <a href="{% url 'add-menu-item' %}" class="btn add-btn">Add New Item</a>
+    </div>
+
     <div class="menu-container">
         {% for item in items %}
         <div class="menu-card">
             <h3>{{ item.name }}</h3>
+            <hr>
             <p>{{ item.description }}</p>
             <p>Price: ${{ item.base_price }}</p>
             <p>Category: {{ item.category.title }}</p>
-            <a href="{% url 'edit-menu-item' item.id %}">Edit</a>  <!-- Edit link -->
+            <div class="item-actions">
+                <a href="{% url 'edit-menu-item' item.id %}" class="btn edit-btn">Edit</a>
+                <form method="post" action="{% url 'delete-menu-item' item.id %}" class="delete-form">
+                    {% csrf_token %}
+                    <button type="submit" class="btn delete-btn"
+                            onclick="return confirm('Are you sure you want to delete this item?')">Delete
+                    </button>
+                </form>
+            </div>
         </div>
         {% endfor %}
+
     </div>
 </body>
 </html>

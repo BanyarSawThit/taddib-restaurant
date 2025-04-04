@@ -1,30 +1,72 @@
-{% extends 'order/base.html' %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Table Availability</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'counter/styles.css' %}">
+</head>
+<body>
+    <h1>Table Availability</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>Table Number</th>
+                <th>Availability</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for table in tables %}
+            <tr id="table-row-{{ table.id }}">
+                <td>{{ table.table_number }}</td>
+                <td class="availability-status">{{ table.availability|yesno:"Available,Occupied" }}</td>
+                <td>
+                    <button class="toggle-status" data-table-id="{{ table.id }}">
+                        Toggle Status
+                    </button>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
 
-{% block body_class %}table-availability-page{% endblock %}
-
-{% block content %}
-    <h1>Table Status</h1>
-    <div class="container">
-        {% for table in tables %}
-        <div class="table-card">
-            <h3>Table {{ table.table_number }}</h3>
-            <div class="status-dot {% if table.availability %}available{% else %}occupied{% endif %}"></div>
-            <div class="status-label">
-                {% if table.availability %}
-                    Available
-                {% else %}
-                    Occupied
-                {% endif %}
-            </div>
-        </div>
-        {% endfor %}
+    <div class="navigation-links">
+        <a href="{% url 'order_management' %}" class="btn nav-btn">View Orders</a>
     </div>
 
-    <!-- Orders Section with arrow button -->
-    <div class="arrow-btn-container">
-        <div class="orders-text">Go to order status</div>
-        <a href="{% url 'order_status' %}">
-            <button class="arrow-btn"></button>
-        </a>
-    </div>
-{% endblock %}
+    <script>
+        // Listen for clicks on the toggle buttons and send AJAX to update table status.
+        document.addEventListener('DOMContentLoaded', function(){
+            document.querySelectorAll('.toggle-status').forEach(function(button){
+                button.addEventListener('click', function(){
+                    const tableId = this.getAttribute('data-table-id');
+                    // Get current status text to determine new status.
+                    const row = document.getElementById(`table-row-${tableId}`);
+                    const statusCell = row.querySelector('.availability-status');
+                    let currentStatus = statusCell.innerText.trim() === 'Available';
+                    // Toggle status.
+                    let newStatus = !currentStatus;
+
+                    fetch(`{% url 'counter:update_table_status' 0 %}`.replace('0', tableId), {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                            'X-CSRFToken': '{{ csrf_token }}'
+                        },
+                        body: `availability=${newStatus}`
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if(data.success){
+                            statusCell.innerText = data.new_status ? 'Available' : 'Occupied';
+                        } else {
+                            alert('Failed to update status.');
+                        }
+                    });
+                });
+            });
+        });
+    </script>
+</body>
+</html>

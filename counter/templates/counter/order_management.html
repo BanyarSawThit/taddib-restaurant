@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Order Management</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'counter/styles.css' %}">
+</head>
+<body>
+<div class="container three-columns">
+    <!-- Left: Order Details -->
+    <div class="left-column" id="order-details">
+        {% if selected_order %}
+            <h2>Order {{ selected_order.id }} Details (Table {{ selected_order.table.table_number }})</h2>
+            <ul>
+                {% for item in selected_order.order_items.all %}
+                    <li>{{ item.selection.item.name }} × {{ item.quantity }} - ${{ item.total_price }}</li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p>Select an order to view details.</p>
+        {% endif %}
+    </div>
+
+    <!-- Middle: Pending Payment -->
+    <div class="middle-column">
+        <h2>Payment</h2>
+        <ul class="orders-list" id="pending-orders-list">
+            {% for order in pending_orders %}
+                <li data-order-id="{{ order.id }}"
+                    class="order-item {% if selected_order and order.id == selected_order.id %}active{% endif %}">
+                    Order {{ order.id }} - Table {{ order.table.table_number }} ({{ order.status }})
+                    <button class="toggle-order-status" data-order-id="{{ order.id }}" data-new-status="Completed">
+                        Mark as Completed
+                    </button>
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <!-- Right: Completed Orders -->
+    <div class="right-column">
+        <h2>Payment History</h2>
+        <ul class="orders-list" id="completed-orders-list">
+            {% for order in completed_orders %}
+                <li data-order-id="{{ order.id }}"
+                    class="order-item {% if selected_order and order.id == selected_order.id %}active{% endif %}">
+                    Order {{ order.id }} - Table {{ order.table.table_number }} ({{ order.status }})
+                    <button class="toggle-order-status" data-order-id="{{ order.id }}" data-new-status="Pending">
+                        Set as Pending
+                    </button>
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+
+<div class="navigation-links">
+    <a href="{% url 'table_availability' %}" class="btn nav-btn">View Tables</a>
+</div>
+
+
+<script>
+    // Listen for order list clicks to load order details.
+    document.addEventListener('DOMContentLoaded', function () {
+        const orderDetails = document.getElementById('order-details');
+
+        function bindOrderClicks(containerId) {
+            const container = document.getElementById(containerId);
+            if (container) {
+                container.addEventListener('click', function (e) {
+                    let orderItem = e.target.closest('.order-item');
+                    if (orderItem && !e.target.matches('.toggle-order-status')) {
+                        document.querySelectorAll(".order-item").forEach(li => li.classList.remove("active"));
+                        orderItem.classList.add("active");
+
+                        let orderId = orderItem.getAttribute('data-order-id');
+                        fetch(`/counter/orders/${orderId}/`)
+                            .then(response => response.json())
+                            .then(data => {
+                                let detailsHTML = `<h2>Order ${data.order_id} Details (Table ${data.table_number})</h2>`;
+                                detailsHTML += "<ul>";
+                                data.items.forEach(item => {
+                                    detailsHTML += `<li>${item.name} × ${item.quantity} - $${item.price}</li>`;
+                                });
+                                detailsHTML += "</ul>";
+                                orderDetails.innerHTML = detailsHTML;
+                            });
+                    }
+
+                    // Toggle button
+                    if (e.target.matches('.toggle-order-status')) {
+                        e.stopPropagation();
+
+                        let button = e.target;
+                        let orderId = button.getAttribute('data-order-id');
+                        let newStatus = button.getAttribute('data-new-status');
+
+                        fetch(`/counter/orders/${orderId}/update/`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/x-www-form-urlencoded',
+                                'X-CSRFToken': '{{ csrf_token }}'
+                            },
+                            body: `status=${newStatus}`
+                        })
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data.success) {
+                                    location.reload(); // Refresh the page to reflect changes
+                                } else {
+                                    alert('Failed to update order status.');
+                                }
+                            });
+                    }
+                });
+            }
+        }
+
+        bindOrderClicks('pending-orders-list');
+        bindOrderClicks('completed-orders-list');
+    });
+</script>
+</body>
+</html>

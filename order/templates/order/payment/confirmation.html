@@ -1,0 +1,90 @@
+{% extends "order/base.html" %}
+
+{% block content %}
+<div class="confirmation-container">
+    <div class="confirmation-header">
+        {% if payment.payment_method == 'card' %}
+            <i class="fas fa-check-circle success-icon"></i>
+            <h2>Payment Successful!</h2>
+        {% elif payment.payment_method == 'cash' %}
+            <i class="fas fa-money-bill-wave cash-icon"></i>
+            <h2>Cash Payment Pending</h2>
+        {% elif payment.payment_method == 'paynow' %}
+            <i class="fas fa-qrcode paynow-icon"></i>
+            <h2>PayNow Payment Pending</h2>
+        {% endif %}
+    </div>
+
+    <div class="order-details">
+        <h3>Order #{{ order.id }}</h3>
+        <p><strong>Amount:</strong> ${{ payment.amount }}</p>
+        {% if payment.payment_method == 'card' %}
+            <p><strong>Payment ID:</strong> {{ payment.stripe_charge_id }}</p>
+        {% endif %}
+        <p><strong>Payment Method:</strong> {{ payment.get_payment_method_display }}</p>
+        <p><strong>Date:</strong> {{ payment.timestamp|date:"F j, Y H:i" }}</p>
+        {% if payment.payment_method == 'cash' %}
+            <div class="alert alert-info">
+                Please prepare cash when your order arrives.
+            </div>
+        {% elif payment.payment_method == 'paynow' %}
+            <div class="alert alert-info">
+                Please complete your PayNow payment.
+            </div>
+        {% endif %}
+    </div>
+
+
+    <div class="order-items">
+        <h4>Items Ordered:</h4>
+        <ul>
+            {% for item in order.order_items.all %}
+            <li>
+                {{ item.selection.item.name }} x{{ item.quantity }} - ${{ item.total_price }}
+                {% if item.selection.meat_option %}
+                <br><small>Meat: {{ item.selection.meat_option.name }}</small>
+                {% endif %}
+                {% if item.selection.spicy_level %}
+                <br><small>Spicy Level: {{ item.selection.spicy_level.name }}</small>
+                {% endif %}
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <div class="actions">
+        <a href="{% url 'table_view' %}" class="btn btn-primary">Return to Home</a>
+        {% if payment.payment_method != 'card' %}
+            <a href="{% url 'payment_checkout' order.id %}" class="btn btn-secondary">Change Payment Method</a>
+        {% endif %}
+    </div>
+</div>
+
+<style>
+    /* Add to your existing styles */
+    .cash-icon {
+        color: #28a745;
+        font-size: 4rem;
+        margin-bottom: 1rem;
+    }
+
+    .paynow-icon {
+        color: #17a2b8;
+        font-size: 4rem;
+        margin-bottom: 1rem;
+    }
+
+    .alert {
+        padding: 0.75rem 1.25rem;
+        margin-bottom: 1rem;
+        border: 1px solid transparent;
+        border-radius: 0.25rem;
+    }
+
+    .alert-info {
+        color: #0c5460;
+        background-color: #d1ecf1;
+        border-color: #bee5eb;
+    }
+</style>
+{% endblock %}
