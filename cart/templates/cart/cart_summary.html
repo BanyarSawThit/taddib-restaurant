@@ -1,32 +1,79 @@
 {% extends 'order/base.html' %}
+{% load static %}
 
 {% block content %}
-<div class="cart-summary">
-    <h2>Cart Summary</h2>
+<link rel="stylesheet" href="{% static 'css/cart.css' %}">
+<script src="{% static 'js/cart.js' %}" defer></script>
 
-    {% for item in cart %}
-    <div class="cart-item">
-        <h3>{{ item.item.name }}</h3>
-        {% if item.selection %}
-        <p>Meat: {{ item.meat_option.name }}</p>
-        {% else %}
-        <p>Meat: None</p>
+<div class="cart-container">
+    <div class="cart-header">
+        {% if table_id %}
+        <a href="{% url 'menu_view' table_id=table_id %}" class="back-arrow-btn">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+                <path d="M19 12H5M12 19l-7-7 7-7"/>
+            </svg>
+        </a>
         {% endif %}
+        <h2>Cart Summary</h2>
+    </div>
 
-        {% if item.spicy_level %}
-        <p>Spicy Level: {{ item.spicy_level.name }}</p>
-        {% else %}
-        <p>Spicy Level: 0</p>
+    <div class="cart-items">
+        {% for item in cart %}
+        <div class="cart-item">
+            <div class="cart-item-information">
+                <span class="item-quantity">{{ item.quantity }}x</span>
+                <span class="item-name">{{ item.item.name }}</span>
+                <span class="item-price">S${{ item.item_total }}</span>
+            </div>
+
+            <div class="item-details">
+                {% if item.meat_option %}
+                <p>{{ item.meat_option.name }}</p>
+                {% endif %}
+                {% if item.spicy_level %}
+                <p>{{ item.spicy_level.name }} spicy level</p>
+                {% endif %}
+            </div>
+
+            <div class="cart-item-actions">
+                <a href="{% url 'cart_remove' forloop.counter0 %}" class="remove-btn">Remove</a>
+            </div>
+        </div>
+        {% if not forloop.last %}
+        <hr class="item-divider">
         {% endif %}
+        {% empty %}
+        <p class="empty-cart">Your cart is empty.</p>
+        {% endfor %}
+    </div>
 
-        <p>Quantity: {{ item.quantity }}</p>
-        <p>Total Price: ${{ item.item_total }}</p>
+    {% if cart %}
+    <div class="edit-section">
+        <button id="edit-order-btn" class="edit-btn">
+            <svg class="edit-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+            </svg>
+            Edit Order
+        </button>
     </div>
-    <hr>
-    {% endfor %}
-    <div class="payment-note">
-        Payment on way to this kind when the service stops.
+    {% endif %}
+
+    <div class="cart-footer">
+        <div class="total-section">
+            <div class="total-row">
+                <span>Total:</span>
+                <span>S${{ total_price }}</span>
+            </div>
+            <p class="price-disclaimer">The price may vary at checkout due to service charges</p>
+        </div>
+
+        <div class="confirm-section">
+            <a href="{% url 'cart_confirm' %}" class="confirm-btn">
+                <span class="item-count">{{ total_quantity }}</span>
+                <span class="confirm-text">CONFIRM</span>
+                <span class="confirm-total">S${{ total_price }}</span>
+            </a>
+        </div>
     </div>
-    <a href="{% url 'cart_confirm' %}" class="confirm-btn">Confirm Order</a>
 </div>
 {% endblock %}

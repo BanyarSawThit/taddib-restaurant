@@ -23,7 +23,7 @@
                     </button>
                     {% for meat in item.get_meat_options %}
                     <button type="button" class="option-btn" data-value="{{ meat.id }}" data-extra="{{ meat.extra_cost }}">
-                        {{ meat.name }} (+${{ meat.extra_cost }})
+                        {{ meat.name }} (+S${{ meat.extra_cost }})
                     </button>
                     {% endfor %}
                 </div>
@@ -60,7 +60,7 @@
                 {% endif %}
 
                 <!-- Price Display -->
-                <div class="total-price">Total Price: $<span id="total-price">{{ item.base_price }}</span></div>
+                <div class="total-price">Total Price: S$<span id="total-price">{{ item.base_price }}</span></div>
                 <button type="submit">Add to Cart</button>
             </form>
         </div>

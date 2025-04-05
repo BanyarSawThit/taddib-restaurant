@@ -21,7 +21,7 @@
                             <div class="menu-item" data-category="{{ x.category.id }}">
                                 <img src="{{ x.image.url }}" alt="{{ x.name }}">
                                 <h3>{{ x.name }}</h3>
-                                <p>${{ x.base_price }}</p>
+                                <p>S${{ x.base_price }}</p>
                                 <a href="{% url 'selection_view' table_id=table_id item_id=x.pk %}" class="select-btn">Select</a>
                             </div>
                         {% endif %}
@@ -36,8 +36,6 @@
         <div class="sticky-cart-content">
             <!-- Quantity and Total (upper part) -->
             <span class="sticky-cart-text">
-{#                Quantity: {{ cart_quantity }}#}
-{#                <i>S$ {{ cart_total }}</i>#}
                 Cart
             </span>
             <hr class="cart-divider">
