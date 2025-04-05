@@ -110,7 +110,7 @@ button.toggle-order-status:hover {
 .left, .middle, .right {
     flex: 1;
     text-align: center;
-    background-color: #fca422;
+    background: linear-gradient(#f4ad13, #e88421);
     color: #000000;
 }
 
@@ -189,13 +189,14 @@ h1, h2 {
     top: 0; /* Stick to the top of the viewport */
     z-index: 10; /* Make sure it stays above the other content */
     padding: 10px 0;
+    color: white;
     margin: 0;
     text-align: center;
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Optional: shadow for better visibility */
 }
 
 h1 {
-    background-color: #fca422;
+    background: linear-gradient(#f4ad13, #e88421);
 }
 
 /* Table Styling */

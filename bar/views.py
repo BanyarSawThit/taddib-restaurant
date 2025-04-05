@@ -1,13 +1,13 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from order.models import Order
+from django.db.models import Q, Count
 
 def bar_view(request):
     # Get all pending orders with bar items that are waiting
     waiting_orders = Order.objects.filter(
         status='Pending',
-        bar_status='Waiting',
-        order_items__selection__item__category__title='Drink'
-    ).distinct().order_by('date_ordered')[:6]  # Limit to 6 orders
+        bar_status='Waiting'
+    ).prefetch_related('order_items').order_by('date_ordered')[:6]
 
     # Get preparing orders (for potential display if needed)
     preparing_orders = Order.objects.filter(
@@ -16,10 +16,14 @@ def bar_view(request):
     ).prefetch_related('order_items').order_by('date_ordered')
 
     # Count waiting orders
-    waiting_count = Order.objects.filter(
+    waiting_orders_qs = Order.objects.filter(
         status='Pending',
         bar_status='Waiting'
-    ).count()
+    ).annotate(
+        non_food_count=Count('order_items', filter=~Q(order_items__selection__item__category__title__iexact='Food'))
+    ).filter(non_food_count__gt=0)
+
+    waiting_count = waiting_orders_qs.distinct().count()
 
     context = {
         'waiting_orders': waiting_orders,

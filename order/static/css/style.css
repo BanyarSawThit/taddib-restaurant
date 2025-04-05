@@ -1,118 +1,146 @@
-/* Ensure full-page layout */
+@import url('https://fonts.googleapis.com/css2?family=Birthstone&family=Mr+Bedfort&family=Playwrite+MX+Guides&display=swap');
+/*-------------Menu--------------*/
 body {
     font-family: Arial, sans-serif;
     margin: 0;
-    padding: 0;
+    padding: 10px;
     display: flex;
     flex-direction: column;
     height: 100vh;
 }
 
-/* Fixed Header */
-.page-header {
-    background: linear-gradient(to bottom, #f6a828, #d78c0e);
-    padding: 20px 0;
+#table_selection {
+    align-items: center;
     text-align: center;
-    color: white;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+#table_selection p {
+    padding-bottom: 30px;
+}
+
+.page-header {
+    background: linear-gradient(to bottom, #f4ad13, #d7730e);
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
     position: fixed;
+    font-family: 'Birthstone', cursive;
     width: 100%;
     top: 0;
     left: 0;
+    height: 120px;
     z-index: 1000;
 }
 
-.page-header h1 {
-    font-size: 3rem;
+.table-link {
+    color: #121212 !important;
+}
+
+.page-header h1 a {
+    font-size: 5rem;
     margin: 0;
+    padding: 10px 20px;
+    display: inline-block;
+    transition: all 0.3s ease;
+    font-family: 'Birthstone', cursive;
+    line-height: 1;
+    text-decoration: none;
+    color: whitesmoke;
 }
 
-/* Link inside h1 (anchor tag) */
-h1 a {
-    color: #030000; /* Changes the text color of the link inside h1 */
-    text-decoration: none; /* Removes underline from the link */
-}
-
-/* Optional: Style the link on hover */
 h1 a:hover {
-    color: #5b3001; /* Changes the color of the link when hovered */
+    color: #5b3001;
+    border-radius: 45px;
 }
 
-/* Push content down below the header */
 main.container {
     display: flex;
     flex-grow: 1;
-    margin-top: 80px; /* Adjust based on header height */
-    height: calc(100vh - 80px); /* Ensure it fits within viewport */
-    overflow-y: auto; /* Enable vertical scrolling if content overflows */
+    margin-top: 80px;
+    height: calc(100vh - 80px);
+    overflow-y: auto;
 }
 
-/* Content Styling */
 .base-container {
-    padding: 20px;
-    flex-grow: 1; /* Allow it to grow and take up remaining space */
-    overflow-y: auto; /* Ensure scrollability for content */
+    flex-grow: 1;
+    overflow-y: auto;
 }
 
 .base-container a {
-    color: #030000;
+    color: white;
+    font-size: 18px;
     text-decoration: none;
 }
 
 .base-container a:hover {
-    background-color: #f6a828;
+    background-color: #d5730e;
+}
+
+/* Hide scrollbar for Chrome, Safari and Opera */
+.base-container::-webkit-scrollbar,
+main.container::-webkit-scrollbar,
+.sidebar::-webkit-scrollbar {
+    display: none;
+}
+
+/* Hide scrollbar for IE, Edge and Firefox */
+.base-container,
+main.container,
+.sidebar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
 }
 
 .row {
     margin-top: 30px;
     display: flex;
-    width: 100%; /* Ensure it takes up the full available space */
-    flex-direction: column; /* Ensure the content is stacked vertically */
+    width: 100%;
+    flex-direction: column;
 }
 
 .col {
     flex-grow: 1;
-    display: block; /* Make sure the content does not sit side by side */
+    display: block;
 }
 
-/* For responsive design (if needed) */
 @media (max-width: 768px) {
     .page-header h1 {
         font-size: 2rem;
     }
 }
 
-/* Menu-specific Styles */
-
-/* Change background for the menu page */
 body.menu-page {
     background-color: #f8f8f8;
 }
 
-/* Enable smooth scrolling on anchor links */
 html {
     scroll-behavior: smooth;
 }
 
-/* Sidebar */
+/*------------Categories (e.g. Food, Drinks)------------*/
 .sidebar {
-    width: 80px;
-    background: white;
+    width: 100px;
     height: 100%;
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 15px;
-    padding: 20px 10px 10px;
+    padding: 25px 10px 10px;
     overflow-y: auto;
     position: fixed;
     left: 0;
-    top: 130px; /* Start below header */
+    top: 145px;
     bottom: 0;
 }
 
 .category-btn {
     background: white;
-    border: 1px solid #ddd; /* Light gray border for the line margin */
+    border: 1px solid #ddd;
     padding: 8px;
     border-radius: 12px;
     cursor: pointer;
@@ -121,15 +149,15 @@ html {
     margin: 10px;
     align-items: center;
     justify-content: center;
-    width: 60px;
-    height: 60px;
-    /* Downward shadow */
-    box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.2); /* Adjust blur and spread as needed */
+    width: 80px;
+    height: 80px;
+    box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.2);
 }
 
 .category-btn img {
-    width: 40px;
-    height: 40px;
+    width: 60px;
+    height: 60px;
+    border-radius: 10px;
 }
 
 .category-btn:hover {
@@ -139,12 +167,16 @@ html {
 .category-section {
     padding: 20px;
     margin-bottom: 20px;
-    border-top: 2px solid #ddd;
+    border-bottom: 2px solid #ddd;
 }
 
-/* Menu Items Styling */
+.category-section:last-child {
+    border-bottom: none;
+}
+
+/*-------------Menu Cards-------------*/
 .menu-container {
-    margin-left: 100px; /* Space for the sidebar */
+    margin-left: 100px;
     padding: 20px;
 }
 
@@ -155,13 +187,12 @@ html {
 }
 
 .menu-item {
-    background: white;
     padding: 10px;
     border-radius: 10px;
     box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
     margin: 10px;
     text-align: center;
-    width: 200px;
+    width: 95%;
 }
 
 h2 {
@@ -181,16 +212,17 @@ h3 {
 }
 
 .menu-item h3 {
-    font-size: 18px;
+    font-size: 20px;
     margin: 10px 0;
 }
 
 .menu-item p {
-    font-size: 16px;
+    font-size: 18px;
     font-weight: bold;
     color: #d78c0e;
 }
 
+/*-------------Selection (Menu Side)-------------*/
 .select-btn {
     display: block;
     padding: 8px;
@@ -199,70 +231,159 @@ h3 {
     text-decoration: none;
     border-radius: 5px;
     margin-top: 10px;
-    transition: 0.3s;
+    transition: all 0.3s ease;
 }
 
 .select-btn:hover {
-    background-color: #b06a0f;
+    color: #5b3001;
 }
 
-/*customization_page button style starts here*/
+/*-------------Order Customization-----------*/
+/* Product Container */
+.product {
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+    display: flex;
+    gap: 30px;
+    align-items: flex-start;
+}
+
+/* Product Photo */
+.product-photo {
+    width: 200px;
+    height: 200px;
+    object-fit: cover;
+    border-radius: 15px;
+    flex-shrink: 0;
+}
+
+/* Product Content (right side) */
+.product-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Product Name */
+.product-name {
+    font-size: 24px;
+    color: #333;
+    margin: 0;
+}
+
+/* Product Description */
+.product-description {
+    font-size: 16px;
+    color: #555;
+    line-height: 1.5;
+    margin-bottom: 20px;
+}
+
+/* Customization Section */
+.customization {
+    margin-top: 20px;
+}
+
+/* Section Headers */
+.item-customization h4 {
+    font-size: 18px;
+    color: #333;
+    margin: 15px 0 10px;
+    font-weight: 600;
+}
+
+/* Button Groups */
 .button-group {
     display: flex;
-    gap: 10px;
+    flex-wrap: wrap;
+    gap: 8px;
     margin-bottom: 15px;
 }
 
+/* Option Buttons */
 .option-btn {
-    padding: 10px 15px;
-    border: 1px solid #ccc;
-    background-color: #f8f8f8;
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    background: #f8f8f8;
+    border-radius: 4px;
     cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 14px;
+}
+
+.option-btn:hover {
+    background: #eee;
 }
 
 .option-btn.selected {
-    background-color: #4CAF50;
+    background: #4CAF50;
     color: white;
     border-color: #4CAF50;
 }
 
+/* Quantity Selector */
 .quantity-selector {
     display: flex;
     align-items: center;
     gap: 10px;
+    margin: 20px 0;
 }
 
 .quantity-selector button {
-    padding: 5px 10px;
+    width: 30px;
+    height: 30px;
+    border: 1px solid #ddd;
+    background: #f8f8f8;
+    border-radius: 4px;
     cursor: pointer;
+    font-size: 16px;
 }
 
-/*customization_page button style ends here*/
+.quantity-selector span {
+    min-width: 30px;
+    text-align: center;
+}
 
-/*popup style*/
-.popup {
-    position: fixed;
-    top: 80%;
-    left: 50%;
-    transform: translateX(-50%);
-    background-color: #28a745;
+/* Add to Cart Button */
+button[type="submit"] {
+    background: #f19c2d;
     color: white;
-    padding: 10px 20px;
-    border-radius: 5px;
-    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
-    font-weight: bold;
-    z-index: 1000;
-    animation: fadeIn 0.5s;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 4px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    width: 100%;
+    max-width: 200px;
+    transition: background 0.2s ease;
+    margin-top: 20px;
 }
 
-/*popup style end*/
+button[type="submit"]:hover {
+    background: #e68a1a;
+}
 
-/* Sticky Cart at the Bottom-Left */
+/* Price Display */
+.total-price {
+    font-size: 20px;
+    font-weight: 600;
+    color: #333;
+    margin-top: 15px;
+}
+
+.total-price span {
+    color: #d78c0e;
+}
+
+/*-------------Confirm button (Menu Side)-------------*/
 .sticky-cart {
     position: fixed;
     right: 0;
-    bottom: 20px; /* 20px from the bottom */
-    width: 250px; /* Control the width of the cart */
+    bottom: 20px;
+    width: 250px;
     background: #b04f07;
     padding: 15px 20px;
     box-shadow: 0 -4px 10px rgba(0, 0, 0, 0.1);
@@ -274,7 +395,7 @@ h3 {
 /* Sticky cart content */
 .sticky-cart-content {
     display: flex;
-    flex-direction: column; /* Stack elements vertically */
+    flex-direction: column;
     justify-content: space-between;
     align-items: flex-start;
     height: 100%;
@@ -283,21 +404,20 @@ h3 {
 /* Sticky cart text (quantity and total) */
 .sticky-cart-text {
     color: white;
-    font-size: 16px;
+    font-size: 18px;
     margin-bottom: 2px;
+    font-weight: bold;
 }
 
 .sticky-cart-text i {
-    padding-left: 80px; /* Adds padding to the left of the total price */
+    padding-left: 80px;
 }
 
 .cart-divider {
-    border: 0; /* Remove default border */
-    border-top: 1px solid #ddd; /* Light gray border to create the line */
-    width: 100%; /* Make sure the line spans the full width */
+    border-top: 1px solid #ddd;
+    width: 100%;
 }
 
-/* Sticky cart action (Go to Cart link) */
 .sticky-cart-action {
     font-size: 20px;
     font-weight: bold;
@@ -305,127 +425,84 @@ h3 {
     color: white;
 }
 
-/* Optional: Hover effect on the "Go to Cart" link */
 .sticky-cart-action:hover {
-    color: #000000;
+    transition: all 0.3s ease;
+    color: #5b3001;
+    border-radius: 46px;
 }
 
+/*--------------------------------------------------------------------------*/
 /* Mobile View Styles */
 @media (max-width: 768px) {
-    /* Body layout */
+    /*-------------Main Layout Changes-------------*/
     body {
-        font-family: Arial, sans-serif;
-        margin: 0;
         padding: 0;
-        display: flex;
-        flex-direction: column;
-        height: 100vh;
     }
 
-    /* Fixed Header */
     .page-header {
-        padding: 13px 0;
-        font-size: 2rem;
-        text-align: center;
-        position: fixed;
-        width: 100%;
-        top: 0;
-        left: 0;
-        z-index: 1000;
+        padding: 10px 0;
+        height: 75px;
     }
 
-    .page-header h1 {
-        font-size: 2.5rem;
+    .page-header h1 a {
+        font-size: 4rem;
     }
 
-    /* Push content down below the header */
     main.container {
-        display: flex;
-        flex-grow: 1;
-        margin-top: 100px; /* Adjusted for smaller header */
-        height: calc(100vh - 100px); /* Ensure it fits within viewport */
-        overflow-y: auto;
+        margin-top: 35px;
     }
 
     .base-container {
-        padding: 15px;
-        flex-grow: 1;
-        overflow-y: auto;
+        padding: 20px;
     }
 
     .row {
         margin-top: 20px;
-        display: flex;
-        flex-direction: column;
     }
 
-    .col {
-        flex-grow: 1;
-        display: block;
-    }
-
-    /* Sidebar */
+    /*-------------Sidebar-------------*/
     .sidebar {
-        width: 60px; /* Sidebar width */
-        padding: 8px 5px;
-        top: 120px; /* Start below header */
-        bottom: 0;
-        position: fixed;
-        left: 0;
+        width: 60px;
+        padding: 8px;
+        top: 95px;
         gap: 10px;
     }
 
     .category-btn {
-        width: 50px;
-        height: 50px;
-        padding: 5px;
-        font-size: 12px;
+        width: 55px;
+        height: 55px;
+        padding: 0;
     }
 
     .category-btn img {
-        width: 30px;
-        height: 30px;
+        width: 35px;
+        height: 35px;
     }
 
     .category-section {
         border: none;
-        margin-top: 0; /* Adjust the margin top if necessary */
-        margin-bottom: 0; /* Remove any bottom margin */
-        padding: 10px; /* Control padding if needed */
+        margin-bottom: 1px;
     }
 
     .category-section h3 {
         margin: 0;
     }
 
-    /* Menu Page */
-    body.menu-page {
-        background-color: #f8f8f8;
-    }
-
-    /* Menu Grid */
+    /*-------------Menu Cards (Mobile View)-------------*/
     .menu-container {
-        margin-left: 20px; /* Adjusted for sidebar width */
-        padding: 8px;
-        width: calc(100% - 60px); /* Adjust the width to fill the remaining space after the sidebar */
-        margin-top: 0; /* Remove any margin at the top */
-    }
-
-    .menu-container h3 {
         margin-left: 18px;
     }
 
-    /* Updated for 2 columns */
     .menu-grid {
         display: grid;
         grid-template-columns: repeat(2, 1fr); /* Make it 2 columns for mobile view */
-        gap: 1px;
+        gap: 0;
     }
 
     .menu-item {
         width: 135px;
+        margin-left: 0;
         padding: 5px;
-        box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
     }
 
     .menu-item img {
@@ -433,60 +510,31 @@ h3 {
     }
 
     .menu-item h3 {
-        font-size: 13px;
+        font-size: 1rem;
+        font-weight: bold;
     }
 
     .menu-item p {
-        font-size: 14px;
+        font-size: 15px;
+        margin: 10px;
     }
 
+    /*-------------Selection (Menu Side)-------------*/
     .select-btn {
-        font-size: 12px;
-        padding: 6px;
+        font-size: 1rem;
+        text-align: center;
+        border-radius: 10px;
+        width: calc(100% - 20px);
+        margin: 0 auto;
+        display: block;
     }
 
-    /* Customization Page Buttons */
-    .button-group {
-        flex-direction: column;
-        margin-bottom: 10px;
-    }
-
-    .option-btn {
-        padding: 8px 12px;
-        font-size: 14px;
-    }
-
-    .quantity-selector {
-        flex-direction: column;
-        align-items: flex-start;
-    }
-
-    .quantity-selector button {
-        padding: 4px 8px;
-    }
-
-    /* Popup */
-    .popup {
-        top: 80%;
-        left: 50%;
-        transform: translateX(-50%);
-        padding: 10px 15px;
-    }
-
-    /* Sticky Cart */
+    /*-------------Confirm Button (Mobile View)-------------*/
     .sticky-cart {
-        width: 150px;
-        bottom: 10px; /* Adjusted to fit better */
+        width: 130px;
+        bottom: 10px;
         padding: 12px;
-    }
-
-    .sticky-cart-content {
-        flex-direction: column;
-        justify-content: space-between;
-    }
-
-    .sticky-cart-text {
-        font-size: 14px;
+        font-size: 16px;
     }
 
     .sticky-cart-action {
@@ -494,8 +542,25 @@ h3 {
         margin-top: 8px;
     }
 
-    /* Adjust sticky cart action hover */
-    .sticky-cart-action:hover {
-        color: #000000;
+    .product {
+        flex-direction: column;
+        gap: 15px;
+        padding: 15px;
+    }
+
+    .product-photo {
+        width: 100%;
+        height: auto;
+        max-height: 250px;
+        border-radius: 10px;
+        margin-bottom: 10px;
+    }
+
+    .product-content {
+        width: 100%;
+    }
+
+    button[type="submit"] {
+        max-width: 100%;
     }
 }
