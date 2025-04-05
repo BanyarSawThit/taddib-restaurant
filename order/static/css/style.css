@@ -121,6 +121,7 @@ body.menu-page {
 html {
     scroll-behavior: smooth;
 }
+
 /*------------Categories (e.g. Food, Drinks)------------*/
 .sidebar {
     width: 100px;
@@ -220,6 +221,7 @@ h3 {
     font-weight: bold;
     color: #d78c0e;
 }
+
 /*-------------Selection (Menu Side)-------------*/
 .select-btn {
     display: block;
@@ -235,6 +237,7 @@ h3 {
 .select-btn:hover {
     color: #5b3001;
 }
+
 /*-------------Order Customization-----------*/
 /* Product Container */
 .product {
@@ -427,201 +430,137 @@ button[type="submit"]:hover {
     color: #5b3001;
     border-radius: 46px;
 }
+
 /*--------------------------------------------------------------------------*/
-/*body.table-availability-page {*/
-/*    display: flex;*/
-/*    flex-direction: column;*/
-/*    height: 100vh;*/
-/*    margin: 0;*/
-/*    padding: 0;*/
-/*}*/
+/* Mobile View Styles */
+@media (max-width: 768px) {
+    /*-------------Main Layout Changes-------------*/
+    body {
+        padding: 0;
+    }
 
-/*!* Ensure table cards appear in rows and are scrollable *!*/
-/*body.table-availability-page .container {*/
-/*    display: flex;*/
-/*    flex-wrap: wrap;*/
-/*    justify-content: center;*/
-/*    padding: 20px;*/
-/*    overflow-y: auto;*/
-/*    flex-grow: 1;*/
-/*}*/
+    .page-header {
+        padding: 10px 0;
+        height: 75px;
+    }
 
-/*!* Table Card Styling *!*/
-/*body.table-availability-page .table-card {*/
-/*    width: 150px;*/
-/*    height: 150px;*/
-/*    margin: 15px;*/
-/*    padding: 20px;*/
-/*    background-color: white;*/
-/*    border-radius: 8px;*/
-/*    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);*/
-/*    text-align: center;*/
-/*}*/
+    .page-header h1 a {
+        font-size: 4rem;
+    }
 
-/*body.table-availability-stepage .table-card h3 {*/
-/*    margin: 10px 0;*/
-/*}*/
+    main.container {
+        margin-top: 35px;
+    }
 
-/*body.table-availability-page .status-dot {*/
-/*    display: inline-block;*/
-/*    width: 20px;*/
-/*    height: 20px;*/
-/*    border-radius: 50%;*/
-/*}*/
+    .base-container {
+        padding: 20px;
+    }
 
-/*body.table-availability-page .available {*/
-/*    background-color: green;*/
-/*}*/
+    .row {
+        margin-top: 20px;
+    }
 
-/*body.table-availability-page .occupied {*/
-/*    background-color: red;*/
-/*}*/
+    /*-------------Sidebar-------------*/
+    .sidebar {
+        width: 60px;
+        padding: 8px;
+        top: 95px;
+        gap: 10px;
+    }
 
-/*body.table-availability-page .status-label {*/
-/*    margin-top: 10px;*/
-/*}*/
+    .category-btn {
+        width: 55px;
+        height: 55px;
+        padding: 0;
+    }
 
-/*!* Sticky button *!*/
-/*body.table-availability-page .arrow-btn-container {*/
-/*    position: fixed;*/
-/*    bottom: 20px;*/
-/*    left: 50%;*/
-/*    transform: translateX(-50%);*/
-/*    z-index: 100;*/
-/*    text-align: center;*/
-/*}*/
+    .category-btn img {
+        width: 35px;
+        height: 35px;
+    }
 
-/*body.table-availability-page .orders-text {*/
-/*    font-size: 15px;*/
-/*    font-weight: bold;*/
-/*    color: #333;*/
-/*    margin-bottom: 10px;*/
-/*}*/
+    .category-section {
+        border: none;
+        margin-bottom: 1px;
+    }
 
-/*body.table-availability-page .arrow-btn {*/
-/*    padding: 15px 25px;*/
-/*    font-size: 22px;*/
-/*    background-color: #28a745;*/
-/*    color: white;*/
-/*    border: none;*/
-/*    border-radius: 50px;*/
-/*    cursor: pointer;*/
-/*    transition: background-color 0.3s ease;*/
-/*    box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);*/
-/*    display: block;*/
-/*    position: relative;*/
-/*}*/
+    .category-section h3 {
+        margin: 0;
+    }
 
-/*body.table-availability-page .arrow-btn:hover {*/
-/*    background-color: #218838;*/
-/*}*/
+    /*-------------Menu Cards (Mobile View)-------------*/
+    .menu-container {
+        margin-left: 18px;
+    }
 
-/*body.table-availability-page .arrow-btn:active {*/
-/*    transform: scale(0.95);*/
-/*}*/
+    .menu-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr); /* Make it 2 columns for mobile view */
+        gap: 0;
+    }
 
-/*body.table-availability-page .arrow-btn:after {*/
-/*    content: "→";*/
-/*    font-size: 30px;*/
-/*    display: inline-block;*/
-/*    vertical-align: middle;*/
-/*}*/
+    .menu-item {
+        width: 135px;
+        margin-left: 0;
+        padding: 5px;
+    }
 
-/*!* Specific Styles for Order Status Page *!*/
-/*body.order-status-page {*/
-/*    background-color: #f7f7f7;*/
-/*}*/
+    .menu-item img {
+        height: 120px;
+    }
 
-/*!* Order Cards Container *!*/
-/*.order-cards-container {*/
-/*    display: grid;*/
-/*    grid-template-columns: repeat(3, 1fr); !* 3 columns *!*/
-/*    gap: 20px; !* Space between cards *!*/
-/*    padding: 20px;*/
-/*    overflow-y: auto; !* Scrollable if content exceeds *!*/
-/*    max-height: calc(100vh - 200px); !* Keeps the cards container within the viewport *!*/
-/*    margin-top: 30px; !* Adjusted margin-top to move cards up *!*/
-/*}*/
+    .menu-item h3 {
+        font-size: 1rem;
+        font-weight: bold;
+    }
 
-/*.order-card {*/
-/*    background-color: white;*/
-/*    padding: 20px;*/
-/*    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);*/
-/*    border-radius: 8px;*/
-/*    text-align: center;*/
-/*    transition: box-shadow 0.3s ease;*/
-/*    margin-bottom: 20px;*/
-/*}*/
+    .menu-item p {
+        font-size: 15px;
+        margin: 10px;
+    }
 
-/*.order-card:hover {*/
-/*    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);*/
-/*}*/
+    /*-------------Selection (Menu Side)-------------*/
+    .select-btn {
+        font-size: 1rem;
+        text-align: center;
+        border-radius: 10px;
+        width: calc(100% - 20px);
+        margin: 0 auto;
+        display: block;
+    }
 
-/*.order-card h3 {*/
-/*    margin: 10px 0;*/
-/*    font-size: 18px;*/
-/*}*/
+    /*-------------Confirm Button (Mobile View)-------------*/
+    .sticky-cart {
+        width: 130px;
+        bottom: 10px;
+        padding: 12px;
+        font-size: 16px;
+    }
 
-/*.order-card p {*/
-/*    margin: 5px 0;*/
-/*    font-size: 14px;*/
-/*    color: #555;*/
-/*}*/
+    .sticky-cart-action {
+        font-size: 13px;
+        margin-top: 8px;
+    }
 
-/*.status {*/
-/*    padding: 5px;*/
-/*    border-radius: 5px;*/
-/*}*/
+    .product {
+        flex-direction: column;
+        gap: 15px;
+        padding: 15px;
+    }
 
-/*.pending {*/
-/*    background-color: yellow;*/
-/*}*/
+    .product-photo {
+        width: 100%;
+        height: auto;
+        max-height: 250px;
+        border-radius: 10px;
+        margin-bottom: 10px;
+    }
 
-/*.completed {*/
-/*    background-color: green;*/
-/*    color: white;*/
-/*}*/
+    .product-content {
+        width: 100%;
+    }
 
-/*!* Arrow Button Container *!*/
-/*.arrow-btn-container {*/
-/*    text-align: center;*/
-/*    margin-top: 30px; !* Increased margin-top for spacing *!*/
-/*    margin-bottom: 20px; !* Added space between arrow and the bottom *!*/
-/*}*/
-
-/*.tables-text {*/
-/*    font-size: 15px;*/
-/*    font-weight: bold;*/
-/*    color: #333;*/
-/*    margin-bottom: 10px;*/
-/*}*/
-
-/*.arrow-btn {*/
-/*    margin: 0 auto;*/
-/*    padding: 15px 25px;*/
-/*    font-size: 22px;*/
-/*    background-color: #28a745;*/
-/*    color: white;*/
-/*    border: none;*/
-/*    border-radius: 50px;*/
-/*    cursor: pointer;*/
-/*    transition: background-color 0.3s ease;*/
-/*    box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);*/
-/*    display: block;*/
-/*    position: relative;*/
-/*}*/
-
-/*.arrow-btn:hover {*/
-/*    background-color: #218838;*/
-/*}*/
-
-/*.arrow-btn:active {*/
-/*    transform: scale(0.95);*/
-/*}*/
-
-/*.arrow-btn:after {*/
-/*    content: "←";*/
-/*    font-size: 30px;*/
-/*    display: inline-block;*/
-/*    vertical-align: middle;*/
-/*}*/
+    button[type="submit"] {
+        max-width: 100%;
+    }
+}
