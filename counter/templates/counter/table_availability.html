@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Table Availability</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'counter/styles.css' %}">
+</head>
+<body class="table-availability-page">
+    <h1>Table Availability</h1>
+
+    <!-- Table Container for better styling -->
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>Table Number</th>
+                    <th>Availability</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for table in tables %}
+                    <tr id="table-row-{{ table.id }}">
+                        <td>{{ table.table_number }}</td>
+                        <td class="availability-status">{{ table.availability|yesno:"Available,Occupied" }}</td>
+                        <td>
+                            <button class="toggle-status" data-table-id="{{ table.id }}">
+                                Toggle Status
+                            </button>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="navigation-links">
+        <a href="{% url 'counter:order_management' %}" class="btn nav-btn">View Orders</a>
+    </div>
+
+    <script>
+        // Listen for clicks on the toggle buttons and send AJAX to update table status.
+        document.addEventListener('DOMContentLoaded', function(){
+            document.querySelectorAll('.toggle-status').forEach(function(button){
+                button.addEventListener('click', function(){
+                    const tableId = this.getAttribute('data-table-id');
+                    // Get current status text to determine new status.
+                    const row = document.getElementById(`table-row-${tableId}`);
+                    const statusCell = row.querySelector('.availability-status');
+                    let currentStatus = statusCell.innerText.trim() === 'Available';
+                    // Toggle status.
+                    let newStatus = !currentStatus;
+
+                    fetch(`{% url 'counter:update_table_status' 0 %}`.replace('0', tableId), {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                            'X-CSRFToken': '{{ csrf_token }}'
+                        },
+                        body: `availability=${newStatus}`,
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if(data.success){
+                            statusCell.innerText = data.new_status ? 'Available' : 'Occupied';
+                        } else {
+                            alert('Failed to update status.');
+                        }
+                    });
+                });
+            });
+        });
+    </script>
+</body>
+</html>

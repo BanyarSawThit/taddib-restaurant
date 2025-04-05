@@ -25,4 +25,5 @@ urlpatterns = [
     path('manager/', include('manager.urls')),
     path('kitchen/', include('kitchen.urls')),
     path('bar/', include('bar.urls')),
+    path('counter/', include('counter.urls'))
 ]

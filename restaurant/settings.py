@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'manager',
     'kitchen',
     'bar',
+    'counter',
 ]
 
 MIDDLEWARE = [

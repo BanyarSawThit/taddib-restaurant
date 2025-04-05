@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Order Management</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'counter/styles.css' %}">
+</head>
+<body class="order-management-page">
+
+<div class="title three-columns">
+    <div class="left" id="receipt-title">
+        <h2>Order {{ selected_order.id }} Details (Table {{ selected_order.table.table_number }})</h2>
+    </div>
+    <div class="middle" id="payment-title">
+        <h2>Payment</h2>
+    </div>
+    <div class="right" id="history-title">
+        <h2>Payment History</h2>
+    </div>
+</div>
+
+<div class="container three-columns">
+    <!-- Left: Order Details -->
+    <div class="left-column" id="order-details">
+        {% if selected_order %}
+            <table class="order-details-table">
+                <thead>
+                <tr>
+                    <th>Item</th>
+                    <th>Rate</th>
+                    <th>Qty</th>
+                    <th>Amount</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for item in selected_order.order_items.all %}
+                    <tr>
+                        <td>{{ item.selection.item.name }}</td>
+                        <td>${{ item.selection.item.price }}</td>
+                        <td>{{ item.quantity }}</td>
+                        <td>${{ item.total_price }}</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+
+            <!-- Receipt-style total section -->
+            <div class="receipt-total">
+                <hr>
+                <p><strong>Total Amount:</strong> ${{ total_amount }}</p>
+                <p><strong>GST (10%):</strong> ${{ gst_amount }}</p>
+                <p><strong>Total with GST:</strong> ${{ total_with_gst }}</p>
+            </div>
+        {% else %}
+            <p>Select an order to view details.</p>
+        {% endif %}
+    </div>
+
+    <!-- Middle: Pending Payment -->
+    <div class="middle-column">
+        <ul class="orders-list" id="pending-orders-list">
+            {% for order in pending_orders %}
+                <li data-order-id="{{ order.id }}"
+                    class="order-item {% if selected_order and order.id == selected_order.id %}active{% endif %}">
+                    Order {{ order.id }} - Table {{ order.table.table_number }} ({{ order.status }})
+                    <button class="toggle-order-status" data-order-id="{{ order.id }}" data-new-status="Completed">
+                        Mark as Completed
+                    </button>
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <!-- Right: Completed Orders -->
+    <div class="right-column">
+        <ul class="orders-list" id="completed-orders-list">
+            {% for order in completed_orders %}
+                <li data-order-id="{{ order.id }}"
+                    class="order-item {% if selected_order and order.id == selected_order.id %}active{% endif %}">
+                    Order {{ order.id }} - Table {{ order.table.table_number }} ({{ order.status }})
+                    <button class="toggle-order-status" data-order-id="{{ order.id }}" data-new-status="Pending">
+                        Set as Pending
+                    </button>
+                </li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+
+<div class="navigation-links">
+    <a href="{% url 'counter:table_availability' %}" class="btn nav-btn">View Tables</a>
+</div>
+
+<script>
+    // Listen for order list clicks to load order details.
+    document.addEventListener('DOMContentLoaded', function () {
+        const orderDetails = document.getElementById('order-details');
+
+        function bindOrderClicks(containerId) {
+            const container = document.getElementById(containerId);
+            if (container) {
+                container.addEventListener('click', function (e) {
+                    let orderItem = e.target.closest('.order-item');
+                    if (orderItem && !e.target.matches('.toggle-order-status')) {
+                        document.querySelectorAll(".order-item").forEach(li => li.classList.remove("active"));
+                        orderItem.classList.add("active");
+
+                        let orderId = orderItem.getAttribute('data-order-id');
+                        fetch(`/counter/orders/${orderId}/`)
+                            .then(response => response.json())
+                            .then(data => {
+                                let detailsHTML = "<table class='order-details-table'>";
+                                detailsHTML += `
+                                    <thead>
+                                        <tr>
+                                            <th>Item</th>
+                                            <th>Rate</th>
+                                            <th>Qty</th>
+                                            <th>Amount</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                `;
+                                let totalAmount = 0;
+
+                                // Calculate the total amount from the order items
+                                data.items.forEach(item => {
+                                    let itemTotal = parseFloat(item.price) * item.quantity;
+                                    totalAmount += itemTotal;
+                                    detailsHTML += `
+                                        <tr>
+                                            <td>${item.name}</td>
+                                            <td>$${item.price}</td>
+                                            <td>${item.quantity}</td>
+                                            <td>$${itemTotal.toFixed(2)}</td>
+                                        </tr>
+                                    `;
+                                });
+
+                                // Calculate the GST (10%)
+                                let gstAmount = totalAmount * 0.10; // 10% GST
+                                let totalWithGST = totalAmount + gstAmount;
+
+                                // Add GST and total details
+                                detailsHTML += "</tbody></table>";
+                                detailsHTML += `
+                                    <div class="receipt-total">
+                                        <hr>
+                                        <p><strong>Total Amount:</strong> $${totalAmount.toFixed(2)}</p>
+                                        <p><strong>GST (10%):</strong> $${gstAmount.toFixed(2)}</p>
+                                        <p><strong>Total with GST:</strong> $${totalWithGST.toFixed(2)}</p>
+                                    </div>
+                                `;
+
+                                orderDetails.innerHTML = detailsHTML;
+                            });
+                    }
+
+                    // Toggle button
+                    if (e.target.matches('.toggle-order-status')) {
+                        e.stopPropagation();
+
+                        let button = e.target;
+                        let orderId = button.getAttribute('data-order-id');
+                        let newStatus = button.getAttribute('data-new-status');
+
+                        fetch(`/counter/orders/${orderId}/update/`, {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/x-www-form-urlencoded',
+                                'X-CSRFToken': '{{ csrf_token }}'
+                            },
+                            body: `status=${newStatus}`
+                        })
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data.success) {
+                                    location.reload(); // Refresh the page to reflect changes
+                                } else {
+                                    alert('Failed to update order status.');
+                                }
+                            });
+                    }
+                });
+            }
+        }
+
+        bindOrderClicks('pending-orders-list');
+        bindOrderClicks('completed-orders-list');
+    });
+</script>
+
+</body>
+</html>
