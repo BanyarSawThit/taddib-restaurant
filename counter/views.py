@@ -1,19 +1,51 @@
 from django.shortcuts import render, get_object_or_404
 from django.http import JsonResponse
+from decimal import Decimal
 from order.models import Order, OrderItem, Table  # adjust the import as needed
 
+
+# def order_management(request):
+#     all_orders = Order.objects.all().order_by('-date_ordered')
+#     pending_orders = Order.objects.filter(status='Pending').order_by('-date_ordered')
+#     completed_orders = Order.objects.filter(status='Completed').order_by('-date_ordered')
+#     selected_order = all_orders.first() if all_orders.exists() else None
+#     context = {
+#         'all_orders': all_orders,
+#         'pending_orders': pending_orders,
+#         'completed_orders': completed_orders,
+#         'selected_order': selected_order,
+#     }
+#     return render(request, 'counter/order_management.html', context)
 
 def order_management(request):
     all_orders = Order.objects.all().order_by('-date_ordered')
     pending_orders = Order.objects.filter(status='Pending').order_by('-date_ordered')
     completed_orders = Order.objects.filter(status='Completed').order_by('-date_ordered')
-    selected_order = all_orders.first() if all_orders.exists() else None
+
+    # Get selected order if any, else set it to None
+    selected_order = None
+    if request.GET.get('order_id'):
+        selected_order = get_object_or_404(Order, id=request.GET['order_id'])
+
+    # Initialize amounts to zero
+    total_amount = gst_amount = total_with_gst = Decimal('0.00')
+
+    # Calculate amounts for selected order
+    if selected_order:
+        total_amount = sum(item.total_price for item in selected_order.order_items.all())
+        gst_amount = total_amount * Decimal('0.10')  # 10% GST
+        total_with_gst = total_amount + gst_amount
+
     context = {
         'all_orders': all_orders,
         'pending_orders': pending_orders,
         'completed_orders': completed_orders,
         'selected_order': selected_order,
+        'total_amount': total_amount,
+        'gst_amount': gst_amount,
+        'total_with_gst': total_with_gst,
     }
+
     return render(request, 'counter/order_management.html', context)
 
 

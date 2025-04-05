@@ -3,43 +3,8 @@
 <html lang="en">
     <head>
         <title>TADDIB</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
         <link rel="stylesheet" href="{% static 'css/style.css' %}">
-        <!-- Add Font Awesome for icons -->
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-        <style>
-            /* Responsive base styles */
-            @media (max-width: 768px) {
-                .payment-container, .cash-receipt-container, .confirmation-container {
-                    width: 95%;
-                    margin: 1rem auto;
-                    padding: 1rem;
-                }
-
-                .payment-method-tabs {
-                    flex-direction: column;
-                }
-
-                .tab-button {
-                    width: 100%;
-                }
-
-                .qr-code-image {
-                    max-width: 150px;
-                }
-            }
-
-            @media (max-width: 480px) {
-                .order-items td {
-                    display: block;
-                    width: 100%;
-                }
-
-                .payment-button {
-                    padding: 10px;
-                    font-size: 0.9rem;
-                }
-            }
-        </style>
     </head>
     <body>
         <header class="page-header">

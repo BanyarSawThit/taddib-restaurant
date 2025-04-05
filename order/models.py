@@ -5,6 +5,8 @@ from django.core.files.base import ContentFile
 from io import BytesIO
 from django.conf import settings
 from django.urls import reverse
+
+
 # ------------------------------------------------------------------------------
 # Table Model: Represents a dining table in the restaurant.
 # ------------------------------------------------------------------------------
@@ -14,7 +16,8 @@ class Table(models.Model):
     # Indicates if the table is currently available (True by default).
     availability = models.BooleanField(default=True)
     # Stores the QR code image for the table; optional field.
-    qr_code = models.ImageField(upload_to='qrcodes/', blank=True, null=True, help_text='create a qr code everytime a table is saved!')
+    qr_code = models.ImageField(upload_to='qrcodes/', blank=True, null=True,
+                                help_text='create a qr code everytime a table is saved!')
 
     def generate_qr_code(self):
         """
@@ -121,7 +124,8 @@ class MeatOption(models.Model):
 # ------------------------------------------------------------------------------
 class SpicyLevel(models.Model):
     # Name of the spicy level; must be unique.
-    name = models.CharField(max_length=50, unique=True, help_text="Label for the spiciness level (e.g., Mild, Medium, Hot)")
+    name = models.CharField(max_length=50, unique=True,
+                            help_text="Label for the spiciness level (e.g., Mild, Medium, Hot)")
 
     def __str__(self):
         """
@@ -181,12 +185,27 @@ class Order(models.Model):
         """
         return sum(item.total_price for item in self.order_items.all())
 
+    kitchen_status_choices = [
+        ('Waiting', 'Waiting'),
+        ('Preparing', 'Preparing'),
+        ('Ready', 'Ready'),
+    ]
+    kitchen_status = models.CharField(max_length=50, choices=kitchen_status_choices, default='Waiting')
+
+    bar_status = models.CharField(max_length=50, choices=kitchen_status_choices, default='Waiting')
+
+    def get_kitchen_items(self):
+        return self.order_items.exclude(selection__item__category__title='Drink')
+
+    def get_bar_items(self):
+        return self.order_items.filter(selection__item__category__title='Drink')
+
     def __str__(self):
         """
         String representation of the Order.
         Includes the order ID, table number, and current status.
         """
-        return f'Order {self.id} , Table {self.table.table_number} ({self.status})'
+        return f'Order {self.id} , Table {self.table.table_number} ({self.status}), kitchen ({self.kitchen_status}), bar ({self.bar_status})'
 
 
 # ------------------------------------------------------------------------------
@@ -233,7 +252,7 @@ class Payment(models.Model):
         ('refunded', 'Refunded'),
     ]
 
-    order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='payments',  null=True, blank=True)
+    order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='payments', null=True, blank=True)
     amount = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
     payment_method = models.CharField(max_length=20, choices=PAYMENT_METHODS, null=True, blank=True)

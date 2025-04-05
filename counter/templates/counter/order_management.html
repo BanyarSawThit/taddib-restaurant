@@ -24,11 +24,34 @@
     <!-- Left: Order Details -->
     <div class="left-column" id="order-details">
         {% if selected_order %}
-            <ul>
+            <table class="order-details-table">
+                <thead>
+                <tr>
+                    <th>Item</th>
+                    <th>Rate</th>
+                    <th>Qty</th>
+                    <th>Amount</th>
+                </tr>
+                </thead>
+                <tbody>
                 {% for item in selected_order.order_items.all %}
-                    <li>{{ item.selection.item.name }} × {{ item.quantity }} - ${{ item.total_price }}</li>
+                    <tr>
+                        <td>{{ item.selection.item.name }}</td>
+                        <td>${{ item.selection.item.price }}</td>
+                        <td>{{ item.quantity }}</td>
+                        <td>${{ item.total_price }}</td>
+                    </tr>
                 {% endfor %}
-            </ul>
+                </tbody>
+            </table>
+
+            <!-- Receipt-style total section -->
+            <div class="receipt-total">
+                <hr>
+                <p><strong>Total Amount:</strong> ${{ total_amount }}</p>
+                <p><strong>GST (10%):</strong> ${{ gst_amount }}</p>
+                <p><strong>Total with GST:</strong> ${{ total_with_gst }}</p>
+            </div>
         {% else %}
             <p>Select an order to view details.</p>
         {% endif %}
@@ -87,11 +110,49 @@
                         fetch(`/counter/orders/${orderId}/`)
                             .then(response => response.json())
                             .then(data => {
-                                let detailsHTML = "<ul>";
+                                let detailsHTML = "<table class='order-details-table'>";
+                                detailsHTML += `
+                                    <thead>
+                                        <tr>
+                                            <th>Item</th>
+                                            <th>Rate</th>
+                                            <th>Qty</th>
+                                            <th>Amount</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                `;
+                                let totalAmount = 0;
+
+                                // Calculate the total amount from the order items
                                 data.items.forEach(item => {
-                                    detailsHTML += `<li>${item.name} × ${item.quantity} - $${item.price}</li>`;
+                                    let itemTotal = parseFloat(item.price) * item.quantity;
+                                    totalAmount += itemTotal;
+                                    detailsHTML += `
+                                        <tr>
+                                            <td>${item.name}</td>
+                                            <td>$${item.price}</td>
+                                            <td>${item.quantity}</td>
+                                            <td>$${itemTotal.toFixed(2)}</td>
+                                        </tr>
+                                    `;
                                 });
-                                detailsHTML += "</ul>";
+
+                                // Calculate the GST (10%)
+                                let gstAmount = totalAmount * 0.10; // 10% GST
+                                let totalWithGST = totalAmount + gstAmount;
+
+                                // Add GST and total details
+                                detailsHTML += "</tbody></table>";
+                                detailsHTML += `
+                                    <div class="receipt-total">
+                                        <hr>
+                                        <p><strong>Total Amount:</strong> $${totalAmount.toFixed(2)}</p>
+                                        <p><strong>GST (10%):</strong> $${gstAmount.toFixed(2)}</p>
+                                        <p><strong>Total with GST:</strong> $${totalWithGST.toFixed(2)}</p>
+                                    </div>
+                                `;
+
                                 orderDetails.innerHTML = detailsHTML;
                             });
                     }
@@ -129,5 +190,6 @@
         bindOrderClicks('completed-orders-list');
     });
 </script>
+
 </body>
 </html>
