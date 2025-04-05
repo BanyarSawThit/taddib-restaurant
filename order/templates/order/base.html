@@ -1,59 +1,60 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <title>TADDIB</title>
-        <link rel="stylesheet" href="{% static 'css/style.css' %}">
-        <!-- Add Font Awesome for icons -->
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-        <style>
-            /* Responsive base styles */
-            @media (max-width: 768px) {
-                .payment-container, .cash-receipt-container, .confirmation-container {
-                    width: 95%;
-                    margin: 1rem auto;
-                    padding: 1rem;
-                }
-
-                .payment-method-tabs {
-                    flex-direction: column;
-                }
-
-                .tab-button {
-                    width: 100%;
-                }
-
-                .qr-code-image {
-                    max-width: 150px;
-                }
+<head>
+    <title>TADDIB</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <link rel="shortcut icon" href="{% static 'favicon.ico' %}" type="image/x-icon">
+    <!-- Add Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+        /* Responsive base styles */
+        @media (max-width: 768px) {
+            .payment-container, .cash-receipt-container, .confirmation-container {
+                width: 95%;
+                margin: 1rem auto;
+                padding: 1rem;
             }
 
-            @media (max-width: 480px) {
-                .order-items td {
-                    display: block;
-                    width: 100%;
-                }
-
-                .payment-button {
-                    padding: 10px;
-                    font-size: 0.9rem;
-                }
+            .payment-method-tabs {
+                flex-direction: column;
             }
-        </style>
-    </head>
-    <body>
-        <header class="page-header">
-            <div class="container base-container">
-                <h1><a href="{% url 'table_view' %}">TADDIB</a></h1>
-            </div>
-        </header>
-        <main class="container base-container">
-            <div class="row">
-                <div class="col">
-                    {% block content %}
-                    {% endblock %}
-                </div>
-            </div>
-        </main>
-    </body>
+
+            .tab-button {
+                width: 100%;
+            }
+
+            .qr-code-image {
+                max-width: 150px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .order-items td {
+                display: block;
+                width: 100%;
+            }
+
+            .payment-button {
+                padding: 10px;
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+<body>
+<header class="page-header">
+    <div class="container base-container">
+        <h1><a href="{% url 'table_view' %}">TADDIB</a></h1>
+    </div>
+</header>
+<main class="container base-container">
+    <div class="row">
+        <div class="col">
+            {% block content %}
+            {% endblock %}
+        </div>
+    </div>
+</main>
+</body>
 </html>

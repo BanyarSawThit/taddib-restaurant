@@ -236,7 +236,7 @@ def selection_view(request, table_id, item_id):
 
             messages.success(request, "Item successfully added to cart!")
 
-            return render(request, 'cart/cart_summary.html')
+            return redirect('menu_view', table_id=table_id)  # Redirect to menu page
         else:
             # If the form is not valid, create a new empty form instance (or re-render with errors).
             messages.error(request, "There was an error with your selection. Please try again.")
