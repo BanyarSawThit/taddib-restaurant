@@ -264,3 +264,5 @@ def cart_confirm(request):
         request.session.modified = True
 
     return redirect('payment_checkout', order_id=order.id)
+
+#

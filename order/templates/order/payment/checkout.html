@@ -1,0 +1,312 @@
+{% extends "order/base.html" %}
+
+{% block content %}
+<div class="payment-container">
+  <h2>Complete Payment for Order #{{ order.id }}</h2>
+  <div class="order-summary">
+    <p><strong>Total:</strong> ${{ order.get_total }}</p>
+    <p>{{ order.order_items.count }} items in order</p>
+  </div>
+
+  <div class="payment-options">
+    <div class="payment-method-tabs">
+      <button class="tab-button active" data-tab="card">Credit/Debit Card</button>
+      <button class="tab-button" data-tab="cash">Pay with Cash</button>
+      <button class="tab-button" data-tab="qr">Pay with QR Code</button>
+    </div>
+
+    <div class="payment-content">
+      <!-- Card Payment -->
+      <div id="card-tab" class="tab-content active">
+        <form id="payment-form">
+          {% csrf_token %}
+          <div id="card-element" class="card-element"></div>
+          <div id="card-errors" class="card-errors" role="alert"></div>
+          <button id="submit-button" class="payment-button">
+            <span id="button-text">Pay with Card</span>
+            <span id="spinner" class="spinner hidden"></span>
+          </button>
+        </form>
+        <p class="security-notice">
+          <i class="fas fa-lock"></i> Secure payment processed by Stripe
+        </p>
+      </div>
+
+      <!-- Cash Payment -->
+      <div id="cash-tab" class="tab-content">
+        <div class="cash-payment-info">
+          <i class="fas fa-money-bill-wave cash-icon"></i>
+          <p>Please pay the exact amount to the cashier.</p>
+          <p><strong>Total to pay:</strong> ${{ order.get_total }}</p>
+          <form method="POST" action="{% url 'cash_payment' order.id %}">
+            {% csrf_token %}
+            <button type="submit" class="payment-button cash-button">
+              Confirm Cash Payment
+            </button>
+          </form>
+        </div>
+      </div>
+
+      <!-- QR Code Payment -->
+      <div id="qr-tab" class="tab-content">
+        <div class="qr-payment-info">
+          <i class="fas fa-qrcode qr-icon"></i>
+          <p>Scan the QR code below to complete your payment.</p>
+          <div id="qr-code-container">
+            <!-- QR code will be generated here -->
+            <img src="data:image/png;base64,{{ qr_code }}" alt="Payment QR Code" class="qr-code-image">
+          </div>
+          <p class="qr-amount">Amount: ${{ order.get_total }}</p>
+          <div class="payment-status">
+            <div id="payment-status-message"></div>
+            <div id="payment-status-spinner" class="spinner hidden"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://js.stripe.com/v3/"></script>
+<script>
+  // Stripe payment handling
+  const stripe = Stripe('{{ stripe_public_key }}');
+  const elements = stripe.elements();
+  const card = elements.create('card');
+
+  card.mount('#card-element');
+
+  card.addEventListener('change', ({error}) => {
+    const displayError = document.getElementById('card-errors');
+    displayError.textContent = error ? error.message : '';
+  });
+
+  const form = document.getElementById('payment-form');
+  form.addEventListener('submit', async (event) => {
+    event.preventDefault();
+
+    const submitButton = document.getElementById('submit-button');
+    submitButton.disabled = true;
+    document.getElementById('button-text').classList.add('hidden');
+    document.getElementById('spinner').classList.remove('hidden');
+
+    const {paymentMethod, error} = await stripe.createPaymentMethod({
+      type: 'card',
+      card: card,
+    });
+
+    if (error) {
+      document.getElementById('card-errors').textContent = error.message;
+      submitButton.disabled = false;
+      document.getElementById('button-text').classList.remove('hidden');
+      document.getElementById('spinner').classList.add('hidden');
+    } else {
+      const formData = new FormData();
+      formData.append('payment_method_id', paymentMethod.id);
+      formData.append('csrfmiddlewaretoken', '{{ csrf_token }}');
+
+      fetch("{% url 'payment_checkout' order.id %}", {
+        method: 'POST',
+        body: formData
+      }).then(response => {
+        if (response.redirected) {
+          window.location.href = response.url;
+        }
+      });
+    }
+  });
+
+  // Tab switching functionality
+  const tabButtons = document.querySelectorAll('.tab-button');
+  tabButtons.forEach(button => {
+    button.addEventListener('click', () => {
+      // Remove active class from all buttons and tabs
+      tabButtons.forEach(btn => btn.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(tab => {
+        tab.classList.remove('active');
+      });
+
+      // Add active class to clicked button and corresponding tab
+      button.classList.add('active');
+      const tabId = button.dataset.tab + '-tab';
+      document.getElementById(tabId).classList.add('active');
+    });
+  });
+
+  // QR Code payment status checking
+  {% if qr_payment_id %}
+  function checkPaymentStatus() {
+    const statusMessage = document.getElementById('payment-status-message');
+    const statusSpinner = document.getElementById('payment-status-spinner');
+
+    statusSpinner.classList.remove('hidden');
+    statusMessage.textContent = 'Checking payment status...';
+
+    fetch("{% url 'check_qr_payment_status' order.id qr_payment_id %}")
+            .then(response => response.json())
+            .then(data => {
+              if (data.status === 'completed') {
+                window.location.href = "{% url 'payment_confirmation' order.id %}";
+              } else if (data.status === 'pending') {
+                statusMessage.textContent = 'Payment still pending. Please complete the payment.';
+                setTimeout(checkPaymentStatus, 3000); // Check again after 3 seconds
+              } else {
+                statusMessage.textContent = 'Payment not completed yet.';
+                setTimeout(checkPaymentStatus, 3000);
+              }
+              statusSpinner.classList.add('hidden');
+            })
+            .catch(error => {
+              statusMessage.textContent = 'Error checking payment status.';
+              statusSpinner.classList.add('hidden');
+              console.error('Error:', error);
+            });
+  }
+
+  // Start checking payment status
+  checkPaymentStatus();
+  {% endif %}
+</script>
+
+<style>
+  .payment-container {
+    max-width: 600px;
+    margin: 2rem auto;
+    padding: 2rem;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  }
+
+  .payment-options {
+    margin-top: 2rem;
+  }
+
+  .payment-method-tabs {
+    display: flex;
+    border-bottom: 1px solid #ddd;
+    margin-bottom: 1rem;
+  }
+
+  .tab-button {
+    flex: 1;
+    padding: 0.75rem;
+    background: none;
+    border: none;
+    border-bottom: 3px solid transparent;
+    cursor: pointer;
+    font-weight: 600;
+    color: #666;
+  }
+
+  .tab-button.active {
+    color: #28a745;
+    border-bottom-color: #28a745;
+  }
+
+  .tab-content {
+    display: none;
+    padding: 1rem 0;
+  }
+
+  .tab-content.active {
+    display: block;
+  }
+
+  .card-element {
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    margin: 1rem 0;
+  }
+
+  .card-errors {
+    color: #e74c3c;
+    margin: 0.5rem 0;
+    min-height: 1.5rem;
+  }
+
+  .payment-button {
+    width: 100%;
+    padding: 12px;
+    background: #28a745;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 1rem;
+    cursor: pointer;
+    margin-top: 1rem;
+  }
+
+  .payment-button:disabled {
+    background: #95a5a6;
+    cursor: not-allowed;
+  }
+
+  .cash-button {
+    background: #17a2b8;
+  }
+
+  .spinner {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 3px solid rgba(255,255,255,0.3);
+    border-radius: 50%;
+    border-top-color: white;
+    animation: spin 1s linear infinite;
+    margin-left: 10px;
+    vertical-align: middle;
+  }
+
+  .hidden {
+    display: none;
+  }
+
+  .security-notice {
+    color: #6c757d;
+    text-align: center;
+    margin-top: 1rem;
+  }
+
+  .cash-payment-info, .qr-payment-info {
+    text-align: center;
+    padding: 1rem;
+  }
+
+  .cash-icon {
+    font-size: 3rem;
+    color: #17a2b8;
+    margin-bottom: 1rem;
+  }
+
+  .qr-icon {
+    font-size: 3rem;
+    color: #6f42c1;
+    margin-bottom: 1rem;
+  }
+
+  .qr-code-image {
+    max-width: 200px;
+    margin: 1rem auto;
+    display: block;
+    border: 1px solid #eee;
+    padding: 10px;
+  }
+
+  .qr-amount {
+    font-weight: bold;
+    font-size: 1.2rem;
+    margin: 1rem 0;
+  }
+
+  .payment-status {
+    margin-top: 1rem;
+    text-align: center;
+  }
+
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+</style>
+{% endblock %}

@@ -3,6 +3,9 @@ import qrcode
 from django.db import models
 from django.core.files.base import ContentFile
 from io import BytesIO
+from django.conf import settings
+from django.urls import reverse
+
 
 # ------------------------------------------------------------------------------
 # Table Model: Represents a dining table in the restaurant.
@@ -13,7 +16,8 @@ class Table(models.Model):
     # Indicates if the table is currently available (True by default).
     availability = models.BooleanField(default=True)
     # Stores the QR code image for the table; optional field.
-    qr_code = models.ImageField(upload_to='qrcodes/', blank=True, null=True, help_text='create a qr code everytime a table is saved!')
+    qr_code = models.ImageField(upload_to='qrcodes/', blank=True, null=True,
+                                help_text='create a qr code everytime a table is saved!')
 
     def generate_qr_code(self):
         """
@@ -36,7 +40,7 @@ class Table(models.Model):
         # Call the parent save method to perform the actual database save.
         super().save(*args, **kwargs)
 
-    def __str__(self):
+    def _str_(self):
         """
         String representation of the Table.
         """
@@ -56,7 +60,7 @@ class Category(models.Model):
         # Specifies plural name to be displayed in the admin interface.
         verbose_name_plural = "Categories"
 
-    def __str__(self):
+    def _str_(self):
         """
         String representation of the Category.
         """
@@ -92,7 +96,7 @@ class Item(models.Model):
             return MeatOption.objects.all()
         return MeatOption.objects.none()
 
-    def __str__(self):
+    def _str_(self):
         """
         String representation of the Item.
         """
@@ -108,7 +112,7 @@ class MeatOption(models.Model):
     # Extra cost associated with the meat option.
     extra_cost = models.DecimalField(max_digits=5, decimal_places=2, default=0.00)
 
-    def __str__(self):
+    def _str_(self):
         """
         String representation of the MeatOption.
         """
@@ -120,9 +124,10 @@ class MeatOption(models.Model):
 # ------------------------------------------------------------------------------
 class SpicyLevel(models.Model):
     # Name of the spicy level; must be unique.
-    name = models.CharField(max_length=50, unique=True, help_text="Label for the spiciness level (e.g., Mild, Medium, Hot)")
+    name = models.CharField(max_length=50, unique=True,
+                            help_text="Label for the spiciness level (e.g., Mild, Medium, Hot)")
 
-    def __str__(self):
+    def _str_(self):
         """
         String representation of the SpicyLevel.
         """
@@ -146,7 +151,7 @@ class Selection(models.Model):
         """
         return Decimal(self.meat_option.extra_cost) if self.meat_option else Decimal(0.00)
 
-    def __str__(self):
+    def _str_(self):
         """
         String representation of the Selection.
         Combines the item name with the selected meat and spicy options.
@@ -180,12 +185,27 @@ class Order(models.Model):
         """
         return sum(item.total_price for item in self.order_items.all())
 
-    def __str__(self):
+    kitchen_status_choices = [
+        ('Waiting', 'Waiting'),
+        ('Preparing', 'Preparing'),
+        ('Ready', 'Ready'),
+    ]
+    kitchen_status = models.CharField(max_length=50, choices=kitchen_status_choices, default='Waiting')
+
+    bar_status = models.CharField(max_length=50, choices=kitchen_status_choices, default='Waiting')
+
+    def get_kitchen_items(self):
+        return self.order_items.exclude(selection_itemcategory_title='Drink')
+
+    def get_bar_items(self):
+        return self.order_items.filter(selection_itemcategory_title='Drink')
+
+    def _str_(self):
         """
         String representation of the Order.
         Includes the order ID, table number, and current status.
         """
-        return f'Order {self.id} , Table {self.table.table_number} ({self.status})'
+        return f'Order {self.id} , Table {self.table.table_number} ({self.status}), kitchen ({self.kitchen_status}), bar ({self.bar_status})'
 
 
 # ------------------------------------------------------------------------------
@@ -209,9 +229,58 @@ class OrderItem(models.Model):
         self.total_price = (self.selection.item.base_price + self.selection.get_extra_cost()) * self.quantity
         super().save(*args, **kwargs)
 
-    def __str__(self):
+    def _str_(self):
         """
         String representation of the OrderItem.
         Displays the item's name, quantity, and the associated order's ID.
         """
         return f"{self.selection.item.name} x {self.quantity} (Order {self.order.pk})"
+
+
+# models.py
+class Payment(models.Model):
+    PAYMENT_METHODS = [
+        ('card', 'Credit/Debit Card'),
+        ('cash', 'Cash'),
+        ('paynow', 'PayNow'),
+    ]
+
+    STATUS_CHOICES = [
+        ('pending', 'Pending'),
+        ('completed', 'Completed'),
+        ('failed', 'Failed'),
+        ('refunded', 'Refunded'),
+    ]
+
+    order = models.ForeignKey(Order, on_delete=models.CASCADE, related_name='payments', null=True, blank=True)
+    amount = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    payment_method = models.CharField(max_length=20, choices=PAYMENT_METHODS, null=True, blank=True)
+    stripe_charge_id = models.CharField(max_length=100, blank=True, null=True)
+    customer_phone = models.CharField(max_length=20, blank=True, null=True)
+    timestamp = models.DateTimeField(auto_now_add=True, null=True, blank=True)
+    qr_code = models.ImageField(upload_to='paynow_qr/', blank=True, null=True)
+    billing_email = models.EmailField(blank=True, null=True)
+    notes = models.TextField(blank=True, null=True)
+
+    class Meta:
+        ordering = ['-timestamp']
+        verbose_name = 'Payment'
+        verbose_name_plural = 'Payments'
+
+    def _str_(self):
+        return f"Payment #{self.id} for Order #{self.order.id} ({self.get_status_display()})"
+
+    def save(self, *args, **kwargs):
+        """Auto-set amount if not provided"""
+        if not self.amount and self.order:
+            self.amount = self.order.get_total()
+        super().save(*args, **kwargs)
+
+    def generate_paynow_qr(self):
+        """Generate QR code for PayNow payments"""
+        if self.payment_method == 'paynow' and not self.qr_code:
+            qr_img = qrcode.make(f"PAYNOW|{self.order.id}|{self.amount}")
+            buffer = BytesIO()
+            qr_img.save(buffer, format="PNG")
+            self.qr_code.save(f'paynow_{self.order.id}.png', ContentFile(buffer.getvalue()))
