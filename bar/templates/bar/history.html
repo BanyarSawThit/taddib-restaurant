@@ -42,8 +42,8 @@
             </td>
             <td>
                 <span class="badge
-                    {% if order.status == 'Completed' %}bg-success{% else %}bg-secondary{% endif %}">
-                    {{ order.status }}
+                    {% if order.bar_status == 'Completed' %}bg-success{% else %}bg-secondary{% endif %}">
+                    {{ order.bar_status }}
                 </span>
             </td>
             <td>{{ order.date_ordered|timesince }} ago</td>

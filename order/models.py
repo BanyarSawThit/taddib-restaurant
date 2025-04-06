@@ -187,7 +187,7 @@ class Order(models.Model):
 
     kitchen_status_choices = [
         ('Waiting', 'Waiting'),
-        ('Preparing', 'Preparing'),
+        ('None', 'None'),
         ('Ready', 'Ready'),
     ]
     kitchen_status = models.CharField(max_length=50, choices=kitchen_status_choices, default='Waiting')

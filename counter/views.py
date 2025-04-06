@@ -5,40 +5,44 @@ from order.models import Order, OrderItem, Table  # adjust the import as needed
 
 
 def order_management(request):
-    all_orders = Order.objects.all().order_by('-date_ordered')
     pending_orders = Order.objects.filter(status='Pending').order_by('-date_ordered')
+
+    # Get completed orders and add a timestamp for grouping
     completed_orders = Order.objects.filter(status='Completed').order_by('-date_ordered')
 
-    # Get selected order if any, else set it to None
+    # We'll use the date_ordered field to help separate completion batches
+    # This will create separate groups even for the same table number
+
+    # Initialize the rest of the function as before
     selected_order = None
     selected_table = None
-    table_pending_orders = []
+    order_status = None
+    table_orders = []
 
     if request.GET.get('order_id'):
         selected_order = get_object_or_404(Order, id=request.GET['order_id'])
         selected_table = selected_order.table
-        # Get all pending orders from the same table
-        table_pending_orders = Order.objects.filter(table=selected_table, status='Pending').order_by('-date_ordered')
+        order_status = selected_order.status
+        table_orders = Order.objects.filter(
+            table=selected_table,
+            status=order_status
+        ).order_by('-date_ordered')
 
-    # Initialize amounts to zero
+    # Calculate totals as before
     total_amount = gst_amount = total_with_gst = Decimal('0.00')
-
-    # Calculate combined amounts for all pending orders from the selected table
-    if selected_table and table_pending_orders:
-        # Sum up totals from all pending orders for this table
-        for order in table_pending_orders:
+    if selected_table and table_orders:
+        for order in table_orders:
             total_amount += sum(item.total_price for item in order.order_items.all())
-
-        gst_amount = total_amount * Decimal('0.10')  # 10% GST
+        gst_amount = total_amount * Decimal('0.10')
         total_with_gst = total_amount + gst_amount
 
     context = {
-        'all_orders': all_orders,
         'pending_orders': pending_orders,
         'completed_orders': completed_orders,
         'selected_order': selected_order,
         'selected_table': selected_table,
-        'table_pending_orders': table_pending_orders,
+        'order_status': order_status,
+        'table_orders': table_orders,
         'total_amount': total_amount,
         'gst_amount': gst_amount,
         'total_with_gst': total_with_gst,
@@ -50,15 +54,16 @@ def order_management(request):
 def order_detail(request, order_id):
     """
     Returns JSON details of a specific order's items,
-    including all pending items from the same table.
+    including all items from the same table with the same status.
     """
     order = get_object_or_404(Order, id=order_id)
     table = order.table
+    status = order.status
 
-    # Get all pending orders from the same table
-    table_orders = Order.objects.filter(table=table, status='Pending')
+    # Get all orders from the same table with the same status
+    table_orders = Order.objects.filter(table=table, status=status)
 
-    # Collect all items from all pending orders for this table
+    # Collect all items from all orders for this table with the same status
     items = []
     for table_order in table_orders:
         for item in table_order.order_items.all():
@@ -78,12 +83,12 @@ def order_detail(request, order_id):
     data = {
         'order_id': order.id,
         'table_number': table.table_number,
+        'status': status,
         'items': items,
-        'status': order.status,
         'total_amount': str(total_amount),
         'gst_amount': str(gst_amount),
         'total_with_gst': str(total_with_gst),
-        'table_pending_orders': [o.id for o in table_orders],
+        'table_orders': [o.id for o in table_orders],
     }
     return JsonResponse(data)
 
@@ -92,7 +97,6 @@ def update_order_status(request, order_id):
     """
     Receives an AJAX POST request to update an order's status.
     When marking as completed, all pending orders from the same table are marked as completed.
-    When marking as pending, all completed orders from the same table are marked as pending.
     """
     if request.method == 'POST':
         order = get_object_or_404(Order, id=order_id)
@@ -112,22 +116,6 @@ def update_order_status(request, order_id):
                 'success': True,
                 'new_status': 'Completed',
                 'completed_orders': order_ids
-            })
-
-        elif new_status == 'Pending':
-            # Mark all completed orders from this table as pending
-            table_orders = Order.objects.filter(table=order.table, status='Completed')
-            order_ids = []
-
-            for table_order in table_orders:
-                table_order.status = 'Pending'
-                table_order.save()
-                order_ids.append(table_order.id)
-
-            return JsonResponse({
-                'success': True,
-                'new_status': 'Pending',
-                'pending_orders': order_ids
             })
 
     return JsonResponse({'success': False})

@@ -24,6 +24,14 @@ body.order-management-page {
     box-sizing: border-box; /* Ensures padding doesn't affect the column size */
 }
 
+.right-column .table-item {
+    background-color: #dadada;
+}
+
+.right-column .table-item:hover {
+    background-color: #bbbaba;
+}
+
 /* Remove default list styling */
 .tables-list {
     list-style-type: none;

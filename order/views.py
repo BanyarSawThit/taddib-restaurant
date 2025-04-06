@@ -120,7 +120,7 @@ def process_payment(request, order_id):
                     payment_method='cash',
                     customer_phone=phone_number or None # Store customer phone number
                 )
-                order.status = 'Pending Payment'
+                order.status = 'Pending'
                 order.save()
 
                 messages.success(request, "Cash payment received! Please present this receipt to staff.")
@@ -142,7 +142,7 @@ def process_payment(request, order_id):
                     payment_method='paynow',
                     customer_phone='90535597'  # Your PayNow number
                 )
-                order.status = 'Pending Payment'
+                order.status = 'Pending'
                 order.save()
 
                 # Generate QR code

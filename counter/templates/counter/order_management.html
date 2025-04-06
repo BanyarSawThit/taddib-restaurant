@@ -11,24 +11,24 @@
 <div class="title three-columns">
     <div class="left" id="receipt-title">
         {% if selected_table %}
-        <h2>Table {{ selected_table.table_number }} Orders</h2>
+            <h2>Table {{ selected_table.table_number }} {% if order_status %}{{ order_status }}{% endif %} Orders</h2>
         {% else %}
-        <h2>Order Details</h2>
+            <h2>Order Details</h2>
         {% endif %}
     </div>
     <div class="middle" id="payment-title">
-        <h2>Payment (Pending)</h2>
+        <h2>Tables with Pending Orders</h2>
     </div>
     <div class="right" id="history-title">
-        <h2>Payment History</h2>
+        <h2>Completed Tables</h2>
     </div>
 </div>
 
 <div class="container three-columns">
     <!-- Left: Order Details -->
     <div class="left-column" id="order-details">
-        {% if selected_order and table_pending_orders %}
-            {% for order in table_pending_orders %}
+        {% if selected_order and table_orders %}
+            {% for order in table_orders %}
                 <h3>Order {{ order.id }}</h3>
                 <table class="order-details-table">
                     <thead>
@@ -60,7 +60,7 @@
                 <p><strong>Total Amount:</strong> ${{ total_with_gst }}</p>
             </div>
         {% else %}
-            <p>Select a table to view order details.</p>
+            <p>Select a table to view orders.</p>
         {% endif %}
     </div>
 
@@ -69,20 +69,20 @@
         {% regroup pending_orders by table as table_grouped_orders %}
         <ul class="tables-list" id="pending-tables-list">
             {% for table_group in table_grouped_orders %}
-                <li class="table-item {% if selected_table and table_group.grouper.id == selected_table.id %}active{% endif %}"
-                    data-table-id="{{ table_group.grouper.id }}"
-                    data-table-number="{{ table_group.grouper.table_number }}">
+                <li class="table-item {% if selected_table and table_group.grouper.id == selected_table.id and order_status == 'Pending' %}active{% endif %}"
+                    data-table-id="{{ table_group.grouper.id }}">
                     <div class="table-header">
                         <h3>Table {{ table_group.grouper.table_number }}</h3>
                         <button class="complete-table-orders"
                                 data-table-id="{{ table_group.grouper.id }}"
                                 data-order-id="{{ table_group.list.0.id }}">
-                            Mark as Completed
+                            Mark All as Completed
                         </button>
                     </div>
                     <ul class="table-orders">
                         {% for order in table_group.list %}
                             <li data-order-id="{{ order.id }}"
+                                data-status="Pending"
                                 class="order-item {% if selected_order and order.id == selected_order.id %}active{% endif %}">
                                 Order {{ order.id }}
                             </li>
@@ -94,30 +94,34 @@
     </div>
 
     <!-- Right: Completed Tables -->
+    <!-- Right: Completed Tables -->
     <div class="right-column">
         {% regroup completed_orders by table as table_grouped_completed %}
         <ul class="tables-list" id="completed-tables-list">
             {% for table_group in table_grouped_completed %}
-                <li class="table-item {% if selected_table and table_group.grouper.id == selected_table.id %}active{% endif %}"
-                    data-table-id="{{ table_group.grouper.id }}"
-                    data-table-number="{{ table_group.grouper.table_number }}">
-                    <div class="table-header">
-                        <h3>Table {{ table_group.grouper.table_number }}</h3>
-                        <button class="reopen-table-orders"
-                                data-table-id="{{ table_group.grouper.id }}"
-                                data-order-id="{{ table_group.list.0.id }}">
-                            Set as Pending
-                        </button>
-                    </div>
-                    <ul class="table-orders">
-                        {% for order in table_group.list %}
-                            <li data-order-id="{{ order.id }}"
-                                class="order-item {% if selected_order and order.id == selected_order.id %}active{% endif %}">
-                                Order {{ order.id }}
-                            </li>
-                        {% endfor %}
-                    </ul>
-                </li>
+                <!-- Further group by date_ordered (truncated to the hour for batching) -->
+                {% regroup table_group.list by date_ordered|date:"YmdH" as date_grouped %}
+
+                {% for date_group in date_grouped %}
+                    <li class="table-item {% if selected_table and table_group.grouper.id == selected_table.id and order_status == 'Completed' and selected_order.date_ordered|date:"YmdH" == date_group.grouper %}active{% endif %}"
+                        data-table-id="{{ table_group.grouper.id }}"
+                        data-date-group="{{ date_group.grouper }}">
+                        <div class="table-header">
+                            <h3>Table {{ table_group.grouper.table_number }}</h3>
+                            <!-- Timestamp to distinguish different completion batches -->
+                            <small>{{ date_group.list.0.date_ordered|date:"M d, H:i" }}</small>
+                        </div>
+                        <ul class="table-orders">
+                            {% for order in date_group.list %}
+                                <li data-order-id="{{ order.id }}"
+                                    data-status="Completed"
+                                    class="order-item {% if selected_order and order.id == selected_order.id %}active{% endif %}">
+                                    Order {{ order.id }}
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    </li>
+                {% endfor %}
             {% endfor %}
         </ul>
     </div>
@@ -142,63 +146,46 @@
                     let orderItem = e.target.closest('.order-item');
 
                     // If the click is on an order item
-                    if (orderItem && !e.target.matches('.complete-table-orders, .reopen-table-orders')) {
+                    if (orderItem && !e.target.matches('.complete-table-orders')) {
+                        e.stopPropagation();
+
                         let orderId = orderItem.getAttribute('data-order-id');
-                        let tableNumber = orderItem.closest('.table-item').getAttribute('data-table-number');
+                        let status = orderItem.getAttribute('data-status');
 
-                        loadOrderDetails(orderId);
-                        updateReceiptTitle(tableNumber);
-
-                        // Highlight the clicked order
+                        // Update active indicators
                         document.querySelectorAll(".order-item").forEach(li => li.classList.remove("active"));
                         orderItem.classList.add("active");
+
+                        document.querySelectorAll(".table-item").forEach(li => li.classList.remove("active"));
+                        tableItem.classList.add("active");
+
+                        // Load order details
+                        loadOrderDetails(orderId);
                     }
                     // If the click is on a table header (but not on a button)
-                    else if (tableItem && !e.target.matches('.complete-table-orders, .reopen-table-orders, .order-item')) {
+                    else if (tableItem && !e.target.matches('.complete-table-orders, .order-item')) {
                         // Get the first order ID from this table
                         let firstOrderItem = tableItem.querySelector('.order-item');
-                        let tableNumber = tableItem.getAttribute('data-table-number');
-
                         if (firstOrderItem) {
                             let orderId = firstOrderItem.getAttribute('data-order-id');
-                            loadOrderDetails(orderId);
-                            updateReceiptTitle(tableNumber);
 
-                            // Highlight the table
+                            // Update active indicators
                             document.querySelectorAll(".table-item").forEach(li => li.classList.remove("active"));
                             tableItem.classList.add("active");
+
+                            // Load order details
+                            loadOrderDetails(orderId);
                         }
                     }
 
                     // Handle the "Mark All as Completed" button
                     if (e.target.matches('.complete-table-orders')) {
                         e.stopPropagation();
-
                         let button = e.target;
                         let orderId = button.getAttribute('data-order-id');
-
                         updateOrderStatus(orderId, 'Completed');
                     }
-
-                    // Handle the "Set All as Pending" button
-                    if (e.target.matches('.reopen-table-orders')) {
-                        e.stopPropagation();
-
-                        let button = e.target;
-                        let orderId = button.getAttribute('data-order-id');
-
-                        updateOrderStatus(orderId, 'Pending');
-                    }
                 });
-            }
-        }
-
-        // Function to update the receipt title
-        function updateReceiptTitle(tableNumber) {
-            if (tableNumber) {
-                receiptTitle.innerHTML = `<h2>Table ${tableNumber} Orders</h2>`;
-            } else {
-                receiptTitle.innerHTML = '<h2>Order Details</h2>';
             }
         }
 
@@ -212,14 +199,14 @@
                 },
                 body: `status=${newStatus}`
             })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    location.reload(); // Refresh the page to reflect changes
-                } else {
-                    alert('Failed to update order status.');
-                }
-            });
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        location.reload(); // Refresh the page to reflect changes
+                    } else {
+                        alert('Failed to update order status.');
+                    }
+                });
         }
 
         // Function to load order details for a specific order
@@ -227,6 +214,9 @@
             fetch(`/counter/orders/${orderId}/`)
                 .then(response => response.json())
                 .then(data => {
+                    // Update the receipt title - include status
+                    receiptTitle.innerHTML = `<h2>Table ${data.table_number} ${data.status} Orders</h2>`;
+
                     // Group items by order_id
                     const orderItems = {};
                     data.items.forEach(item => {

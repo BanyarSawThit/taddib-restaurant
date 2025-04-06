@@ -1,4 +1,5 @@
-from django.shortcuts import render, redirect
+from django.http import JsonResponse
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from order.models import Item, Table, Selection, Order, OrderItem, SpicyLevel, MeatOption
 from decimal import Decimal
@@ -31,15 +32,17 @@ def cart_add(request, table_id, item_id):
         # Initialize the cart in session if it doesn't exist.
         if 'cart' not in request.session:
             request.session['cart'] = []
-        cart = request.session['cart']
-        cart.append(cart_item)
-        request.session['cart'] = cart
+
+        request.session['cart'].append(cart_item)
+        request.session.modified = True
 
         messages.success(request, "Item added to cart.")
-        return redirect('cart_view')
+        return redirect('menu_view', table_id=table_id)
     else:
         messages.error(request, "Invalid request method.")
         return redirect('menu_view', table_id=table_id)
+
+
 def cart_view(request):
     """
     Displays the cart summary.
@@ -48,17 +51,22 @@ def cart_view(request):
     """
     cart = request.session.get('cart', [])
     detailed_cart = []
-    total_price = 0
+    total_price = Decimal('0.00')
+    total_quantity = 0
+    table_id = None
 
-    for cart_item in cart:
+    if cart:
+        table_id = cart[0]['table_id']  # Get table_id from first item
+
+    for index, cart_item in enumerate(cart):  # Added enumerate to get index
         try:
             item = Item.objects.get(pk=cart_item['item_id'])
         except Item.DoesNotExist:
             continue
 
         base_price = item.base_price
-        extra_meat = 0
-        extra_spicy = 0
+        extra_meat = Decimal('0.00')
+        extra_spicy = Decimal('0.00')
 
         # If a meat option was selected, look it up.
         meat_option = None
@@ -79,10 +87,12 @@ def cart_view(request):
                 pass
 
         quantity = cart_item.get('quantity', 1)
+        total_quantity += quantity  # Add to total quantity count
         item_total = (base_price + extra_meat + extra_spicy) * quantity
         total_price += item_total
 
         detailed_cart.append({
+            'id': index,  # Add the index as id for editing
             'item': item,
             'meat_option': meat_option,
             'spicy_level': spicy_level,
@@ -93,21 +103,122 @@ def cart_view(request):
     context = {
         'cart': detailed_cart,
         'total_price': total_price,
+        'total_quantity': total_quantity,  # Add this line
+        'table_id': table_id,
     }
     return render(request, 'cart/cart_summary.html', context)
 
+
+def toggle_edit_mode(request):
+    """Toggle edit mode in session"""
+    request.session['edit_mode'] = not request.session.get('edit_mode', False)
+    return redirect('cart_view')
+
+
+def update_quantities(request):
+    """Handle quantity updates from form submission"""
+    if request.method == 'POST':
+        cart = request.session.get('cart', [])
+
+        # Handle quantity increases
+        if 'increase' in request.POST:
+            item_index = int(request.POST['increase'])
+            if 0 <= item_index < len(cart):
+                cart[item_index]['quantity'] += 1
+
+        # Handle quantity decreases
+        elif 'decrease' in request.POST:
+            item_index = int(request.POST['decrease'])
+            if 0 <= item_index < len(cart):
+                if cart[item_index]['quantity'] > 1:
+                    cart[item_index]['quantity'] -= 1
+                else:
+                    del cart[item_index]
+
+        request.session['cart'] = cart
+        request.session.modified = True
+
+    return redirect('cart_view')
+
+
+def cart_update(request, item_index, change):
+    """
+    Handles quantity updates for cart items
+    """
+    if request.method == 'POST':
+        cart = request.session.get('cart', [])
+
+        try:
+            item_index = int(item_index)
+            change = int(change)
+
+            if 0 <= item_index < len(cart):
+                new_quantity = cart[item_index]['quantity'] + change
+
+                if new_quantity < 1:
+                    # Remove item if quantity would go below 1
+                    del cart[item_index]
+                    item_removed = True
+                else:
+                    cart[item_index]['quantity'] = new_quantity
+                    item_removed = False
+
+                request.session['cart'] = cart
+                request.session.modified = True
+
+                return JsonResponse({
+                    'success': True,
+                    'newQuantity': new_quantity,
+                    'itemRemoved': item_removed
+                })
+
+        except (ValueError, IndexError) as e:
+            return JsonResponse({
+                'success': False,
+                'error': str(e)
+            }, status=400)
+
+    return JsonResponse({
+        'success': False,
+        'error': 'Invalid request'
+    }, status=400)
+
+
+def cart_remove(request, item_index):
+    """
+    Removes an item from the cart based on its index.
+    """
+    cart = request.session.get('cart', [])
+
+    try:
+        item_index = int(item_index)
+        # Remove the item at the specified index
+        del cart[item_index]
+        request.session['cart'] = cart
+        request.session.modified = True
+        messages.success(request, "Item removed from cart.")
+    except (IndexError, ValueError):
+        messages.error(request, "Item not found in cart.")
+
+    return redirect('cart_view')
+
+
+# cart/views.py
+# cart/views.py
 def cart_confirm(request):
     """
     Converts session cart into a database order and clears the cart.
+    Redirects to payment page.
     """
-    cart = request.session.get('cart', None)
+    cart = request.session.get('cart', [])
 
-    if not cart or len(cart) == 0:
+    if not cart:
         messages.error(request, "Cart is empty!")
         return redirect('menu_view', table_id=1)  # fallback table
 
-    table_id = cart[0].get('table_id')  # assume all items are for the same table
-    table = Table.objects.get(pk=table_id)
+    # Get table ID from first item (assume all items are for same table)
+    table_id = cart[0]['table_id']
+    table = get_object_or_404(Table, pk=table_id)
 
     # Create the Order
     order = Order.objects.create(table=table, status="Pending")
@@ -116,36 +227,30 @@ def cart_confirm(request):
         try:
             item = Item.objects.get(pk=cart_item['item_id'])
         except Item.DoesNotExist:
-            continue  # skip this item
+            continue  # skip invalid items
 
+        # Get meat and spicy options if they exist
         meat_option = None
         if cart_item['meat_option']:
-            try:
-                meat_option = MeatOption.objects.get(pk=cart_item['meat_option'])
-            except MeatOption.DoesNotExist:
-                pass
+            meat_option = get_object_or_404(MeatOption, pk=cart_item['meat_option'])
 
         spicy_level = None
         if cart_item['spicy_level']:
-            try:
-                spicy_level = SpicyLevel.objects.get(pk=cart_item['spicy_level'])
-            except SpicyLevel.DoesNotExist:
-                pass
+            spicy_level = get_object_or_404(SpicyLevel, pk=cart_item['spicy_level'])
 
-        # Create Selection (optional step, if you track combinations)
+        # Create selection
         selection = Selection.objects.create(
             item=item,
             meat_option=meat_option,
             spicy_level=spicy_level
         )
 
+        # Calculate price
         quantity = cart_item.get('quantity', 1)
         extra_meat = meat_option.extra_cost if meat_option else Decimal('0.00')
-        extra_spicy = Decimal('0.00')  # Add logic if spicy levels add cost
+        total_price = (item.base_price + extra_meat) * quantity
 
-        total_price = (item.base_price + extra_meat + extra_spicy) * quantity
-
-        # Create OrderItem
+        # Create order item
         OrderItem.objects.create(
             order=order,
             selection=selection,
@@ -153,9 +258,9 @@ def cart_confirm(request):
             total_price=total_price
         )
 
-    # Clear session cart
-    del request.session['cart']
-    request.session.modified = True
+    # Clear cart from session
+    if 'cart' in request.session:
+        del request.session['cart']
+        request.session.modified = True
 
-    messages.success(request, "Order placed successfully!")
-    return redirect('menu_view', table_id=table_id)
+    return redirect('payment_checkout', order_id=order.id)
