@@ -17,10 +17,10 @@
         {% endif %}
     </div>
     <div class="middle" id="payment-title">
-        <h2>Tables with Pending Orders</h2>
+        <h2>Payment (Pending)</h2>
     </div>
     <div class="right" id="history-title">
-        <h2>Completed Tables</h2>
+        <h2>Payment History</h2>
     </div>
 </div>
 
@@ -76,7 +76,7 @@
                         <button class="complete-table-orders"
                                 data-table-id="{{ table_group.grouper.id }}"
                                 data-order-id="{{ table_group.list.0.id }}">
-                            Mark All as Completed
+                            Mark as Completed
                         </button>
                     </div>
                     <ul class="table-orders">

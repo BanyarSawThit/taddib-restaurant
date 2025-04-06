@@ -1,27 +1,39 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <title>TADDIB</title>
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <link rel="stylesheet" href="{% static 'css/style.css' %}">
-    </head>
+<head>
+    <title>TADDIB</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
 
-    <body>
-        <header class="page-header">
-            <div class="container base-container">
-                <h1><a href="{% url 'table_view' %}">Taddib House</a></h1>
-            </div>
-        </header>
+<body>
+<header class="page-header">
+    <div class="container base-container">
+        {#                <h1><a href="{% url 'table_view' %}">Taddib House</a></h1>#}
+        <!-- 
+            Check if 'table_id' exists in the template context.
+            - If 'table_id' exists, the title link directs to the menu page for that table.
+            - If 'table_id' does not exist, the title link directs to the table selection page.
+        -->
+        {% if table_id %}
+            <!-- When a table is selected, link to the menu_view with the given table_id -->
+            <h1><a href="{% url 'menu_view' table_id %}">Taddib House</a></h1>
+        {% else %}
+            <!-- When no table is selected yet, link to the table_view (table selection page) -->
+            <h1><a href="{% url 'table_view' %}">Taddib House</a></h1>
+        {% endif %}
+    </div>
+</header>
 
-        <main class="container base-container">
-            <div class="row">
-                <div class="col">
-                    {% block content %}
-                    {% endblock %}
-                </div>
-            </div>
-        </main>
-    </body>
+<main class="container base-container">
+    <div class="row">
+        <div class="col">
+            {% block content %}
+            {% endblock %}
+        </div>
+    </div>
+</main>
+</body>
 
 </html>

@@ -1,6 +1,5 @@
 {% extends "order/base.html" %}
-{% load static %}
-
+{% load static %} 
 {% block content %}
 <div class="payment-container">
     <h2>Complete Payment for Order #{{ order.id }}</h2>
@@ -261,260 +260,267 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 </script>
-
 <style>
+.payment-container {
+    max-width: 600px;
+    margin: 2rem auto;
+    padding: 2rem;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
+    font-family: 'Segoe UI', system-ui, sans-serif;
+}
+
+.order-summary {
+    background: #f8f9fa;
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 1.5rem;
+}
+
+.order-summary p {
+    margin: 0.5rem 0;
+    font-size: 1.1rem;
+}
+
+.customer-info-section {
+    margin: 1.5rem 0;
+    padding: 1.25rem;
+    background: #f8f9fa;
+    border-radius: 8px;
+    border: 1px solid #e9ecef;
+}
+
+.customer-info-section h3 {
+    margin-top: 0;
+    color: #212529;
+}
+
+.form-group {
+    margin-bottom: 1.25rem;
+}
+
+.form-control {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #ced4da;
+    border-radius: 6px;
+    font-size: 1rem;
+    transition: border-color 0.15s;
+}
+
+.form-control:focus {
+    border-color: #80bdff;
+    outline: 0;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+}
+
+.text-muted {
+    color: #6c757d;
+    font-size: 0.85rem;
+    display: block;
+    margin-top: 0.25rem;
+}
+
+.error-message {
+    color: #dc3545;
+    font-size: 0.85rem;
+    margin-top: 0.25rem;
+    min-height: 1.25rem;
+}
+
+.payment-method-tabs {
+    display: flex;
+    border-bottom: 1px solid #dee2e6;
+    margin-bottom: 1.5rem;
+}
+
+.tab-button {
+    flex: 1;
+    padding: 0.75rem;
+    background: none;
+    border: none;
+    border-bottom: 3px solid transparent;
+    cursor: pointer;
+    font-weight: 600;
+    color: #6c757d;
+    transition: all 0.2s;
+}
+
+.tab-button.active {
+    color: #28a745;
+    border-bottom-color: #28a745;
+}
+
+.tab-content {
+    display: none;
+    animation: fadeIn 0.3s ease;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+.card-element {
+    padding: 1rem;
+    border: 1px solid #ced4da;
+    border-radius: 6px;
+    margin: 1rem 0;
+    background: white;
+}
+
+.payment-button {
+    width: 100%;
+    padding: 0.75rem;
+    background: #28a745;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    {#margin-top: 1rem;#}
+    margin: 0 auto;
+    transition: background-color 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+}
+
+.payment-button:hover {
+    background: #218838;
+}
+
+.payment-button:disabled {
+    background: #6c757d;
+    cursor: not-allowed;
+}
+
+.cash-button {
+    background: #17a2b8;
+}
+
+.cash-button:hover {
+    background: #138496;
+}
+
+.qr-button {
+    background: #6f42c1;
+}
+
+.qr-button:hover {
+    background: #5a32a3;
+}
+
+.security-notice {
+    color: #6c757d;
+    text-align: center;
+    margin-top: 1rem;
+    font-size: 0.9rem;
+}
+
+.cash-icon, .qr-icon {
+    font-size: 2.5rem;
+    color: #17a2b8;
+    margin-bottom: 1rem;
+}
+
+.qr-icon {
+    color: #6f42c1;
+}
+
+.order-number-display {
+    margin: 1.5rem 0;
+    padding: 1rem;
+    background: #f8f9fa;
+    border-radius: 8px;
+    text-align: center;
+}
+
+.order-number {
+    font-size: 2rem;
+    font-weight: bold;
+    color: #17a2b8;
+}
+
+.order-total-display {
+    margin: 1.5rem 0;
+    text-align: center;
+}
+
+.total-amount, .qr-amount {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #28a745;
+}
+
+.payment-instructions {
+    margin-top: 1rem;
+    color: #6c757d;
+    font-size: 0.9rem;
+    text-align: center;
+}
+
+.qr-code-image {
+    max-width: 200px;
+    margin: 1rem auto;
+    display: block;
+    border: 1px solid #eee;
+    padding: 10px;
+    background: white;
+}
+
+.spinner {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 3px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    border-top-color: white;
+    animation: spin 1s linear infinite;
+}
+
+.hidden {
+    display: none;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@media (max-width: 576px) {
     .payment-container {
-        max-width: 600px;
-        margin: 2rem auto;
-        padding: 2rem;
-        background: white;
-        border-radius: 8px;
-        box-shadow: 0 2px 20px rgba(0,0,0,0.1);
-        font-family: 'Segoe UI', system-ui, sans-serif;
-    }
-
-    .order-summary {
-        background: #f8f9fa;
         padding: 1rem;
-        border-radius: 8px;
-        margin-bottom: 1.5rem;
-    }
-
-    .order-summary p {
-        margin: 0.5rem 0;
-        font-size: 1.1rem;
-    }
-
-    .customer-info-section {
-        margin: 1.5rem 0;
-        padding: 1.25rem;
-        background: #f8f9fa;
-        border-radius: 8px;
-        border: 1px solid #e9ecef;
-    }
-
-    .customer-info-section h3 {
-        margin-top: 0;
-        color: #212529;
-    }
-
-    .form-group {
-        margin-bottom: 1.25rem;
-    }
-
-    .form-control {
-        width: 100%;
-        padding: 0.75rem;
-        border: 1px solid #ced4da;
-        border-radius: 6px;
-        font-size: 1rem;
-        transition: border-color 0.15s;
-    }
-
-    .form-control:focus {
-        border-color: #80bdff;
-        outline: 0;
-        box-shadow: 0 0 0 0.2rem rgba(0,123,255,0.25);
-    }
-
-    .text-muted {
-        color: #6c757d;
-        font-size: 0.85rem;
-        display: block;
-        margin-top: 0.25rem;
-    }
-
-    .error-message {
-        color: #dc3545;
-        font-size: 0.85rem;
-        margin-top: 0.25rem;
-        min-height: 1.25rem;
+        margin: 1rem;
     }
 
     .payment-method-tabs {
-        display: flex;
-        border-bottom: 1px solid #dee2e6;
-        margin-bottom: 1.5rem;
+        flex-direction: column;
     }
 
     .tab-button {
-        flex: 1;
-        padding: 0.75rem;
-        background: none;
-        border: none;
-        border-bottom: 3px solid transparent;
-        cursor: pointer;
-        font-weight: 600;
-        color: #6c757d;
-        transition: all 0.2s;
+        border-bottom: none;
+        border-left: 3px solid transparent;
+        text-align: left;
     }
 
     .tab-button.active {
-        color: #28a745;
-        border-bottom-color: #28a745;
+        border-left-color: #28a745;
+        border-bottom: none;
     }
-
-    .tab-content {
-        display: none;
-        animation: fadeIn 0.3s ease;
-    }
-
-    .tab-content.active {
-        display: block;
-    }
-
-    .card-element {
-        padding: 1rem;
-        border: 1px solid #ced4da;
-        border-radius: 6px;
-        margin: 1rem 0;
-        background: white;
-    }
-
-    .payment-button {
-        width: 100%;
-        padding: 0.75rem;
-        background: #28a745;
-        color: white;
-        border: none;
-        border-radius: 6px;
-        font-size: 1rem;
-        font-weight: 600;
-        cursor: pointer;
-        margin-top: 1rem;
-        transition: background-color 0.2s;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 0.75rem;
-    }
-
-    .payment-button:hover {
-        background: #218838;
-    }
-
-    .payment-button:disabled {
-        background: #6c757d;
-        cursor: not-allowed;
-    }
-
-    .cash-button {
-        background: #17a2b8;
-    }
-
-    .cash-button:hover {
-        background: #138496;
-    }
-
-    .qr-button {
-        background: #6f42c1;
-    }
-
-    .qr-button:hover {
-        background: #5a32a3;
-    }
-
-    .security-notice {
-        color: #6c757d;
-        text-align: center;
-        margin-top: 1rem;
-        font-size: 0.9rem;
-    }
-
-    .cash-icon, .qr-icon {
-        font-size: 2.5rem;
-        color: #17a2b8;
-        margin-bottom: 1rem;
-    }
-
-    .qr-icon {
-        color: #6f42c1;
-    }
-
-    .order-number-display {
-        margin: 1.5rem 0;
-        padding: 1rem;
-        background: #f8f9fa;
-        border-radius: 8px;
-        text-align: center;
-    }
-
-    .order-number {
-        font-size: 2rem;
-        font-weight: bold;
-        color: #17a2b8;
-    }
-
-    .order-total-display {
-        margin: 1.5rem 0;
-        text-align: center;
-    }
-
-    .total-amount, .qr-amount {
-        font-size: 1.5rem;
-        font-weight: bold;
-        color: #28a745;
-    }
-
-    .payment-instructions {
-        margin-top: 1rem;
-        color: #6c757d;
-        font-size: 0.9rem;
-        text-align: center;
-    }
-
-    .qr-code-image {
-        max-width: 200px;
-        margin: 1rem auto;
-        display: block;
-        border: 1px solid #eee;
-        padding: 10px;
-        background: white;
-    }
-
-    .spinner {
-        display: inline-block;
-        width: 20px;
-        height: 20px;
-        border: 3px solid rgba(255,255,255,0.3);
-        border-radius: 50%;
-        border-top-color: white;
-        animation: spin 1s linear infinite;
-    }
-
-    .hidden {
-        display: none;
-    }
-
-    @keyframes spin {
-        to { transform: rotate(360deg); }
-    }
-
-    @keyframes fadeIn {
-        from { opacity: 0; }
-        to { opacity: 1; }
-    }
-
-    @media (max-width: 576px) {
-        .payment-container {
-            padding: 1rem;
-            margin: 1rem;
-        }
-
-        .payment-method-tabs {
-            flex-direction: column;
-        }
-
-        .tab-button {
-            border-bottom: none;
-            border-left: 3px solid transparent;
-            text-align: left;
-        }
-
-        .tab-button.active {
-            border-left-color: #28a745;
-            border-bottom: none;
-        }
-    }
+}
 </style>
+
 {% endblock %}
