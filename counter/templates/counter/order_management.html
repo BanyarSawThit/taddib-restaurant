@@ -10,10 +10,14 @@
 
 <div class="title three-columns">
     <div class="left" id="receipt-title">
-        <h2>Order {{ selected_order.id }} Details (Table {{ selected_order.table.table_number }})</h2>
+        {% if selected_table %}
+        <h2>Table {{ selected_table.table_number }} Orders</h2>
+        {% else %}
+        <h2>Order Details</h2>
+        {% endif %}
     </div>
     <div class="middle" id="payment-title">
-        <h2>Payment</h2>
+        <h2>Payment (Pending)</h2>
     </div>
     <div class="right" id="history-title">
         <h2>Payment History</h2>
@@ -23,65 +27,96 @@
 <div class="container three-columns">
     <!-- Left: Order Details -->
     <div class="left-column" id="order-details">
-        {% if selected_order %}
-            <table class="order-details-table">
-                <thead>
-                <tr>
-                    <th>Item</th>
-                    <th>Rate</th>
-                    <th>Qty</th>
-                    <th>Amount</th>
-                </tr>
-                </thead>
-                <tbody>
-                {% for item in selected_order.order_items.all %}
+        {% if selected_order and table_pending_orders %}
+            {% for order in table_pending_orders %}
+                <h3>Order {{ order.id }}</h3>
+                <table class="order-details-table">
+                    <thead>
                     <tr>
-                        <td>{{ item.selection.item.name }}</td>
-                        <td>${{ item.selection.item.price }}</td>
-                        <td>{{ item.quantity }}</td>
-                        <td>${{ item.total_price }}</td>
+                        <th>Item</th>
+                        <th>Rate</th>
+                        <th>Qty</th>
+                        <th>Amount</th>
                     </tr>
-                {% endfor %}
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody>
+                    {% for item in order.order_items.all %}
+                        <tr>
+                            <td>{{ item.selection.item.name }}</td>
+                            <td>${{ item.selection.item.price }}</td>
+                            <td>{{ item.quantity }}</td>
+                            <td>${{ item.total_price }}</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            {% endfor %}
 
             <!-- Receipt-style total section -->
             <div class="receipt-total">
                 <hr>
-                <p><strong>Total Amount:</strong> ${{ total_amount }}</p>
+                <p><strong>Sub Total:</strong> ${{ total_amount }}</p>
                 <p><strong>GST (10%):</strong> ${{ gst_amount }}</p>
-                <p><strong>Total with GST:</strong> ${{ total_with_gst }}</p>
+                <p><strong>Total Amount:</strong> ${{ total_with_gst }}</p>
             </div>
         {% else %}
-            <p>Select an order to view details.</p>
+            <p>Select a table to view order details.</p>
         {% endif %}
     </div>
 
-    <!-- Middle: Pending Payment -->
+    <!-- Middle: Tables with Pending Orders -->
     <div class="middle-column">
-        <ul class="orders-list" id="pending-orders-list">
-            {% for order in pending_orders %}
-                <li data-order-id="{{ order.id }}"
-                    class="order-item {% if selected_order and order.id == selected_order.id %}active{% endif %}">
-                    Order {{ order.id }} - Table {{ order.table.table_number }} ({{ order.status }})
-                    <button class="toggle-order-status" data-order-id="{{ order.id }}" data-new-status="Completed">
-                        Mark as Completed
-                    </button>
+        {% regroup pending_orders by table as table_grouped_orders %}
+        <ul class="tables-list" id="pending-tables-list">
+            {% for table_group in table_grouped_orders %}
+                <li class="table-item {% if selected_table and table_group.grouper.id == selected_table.id %}active{% endif %}"
+                    data-table-id="{{ table_group.grouper.id }}"
+                    data-table-number="{{ table_group.grouper.table_number }}">
+                    <div class="table-header">
+                        <h3>Table {{ table_group.grouper.table_number }}</h3>
+                        <button class="complete-table-orders"
+                                data-table-id="{{ table_group.grouper.id }}"
+                                data-order-id="{{ table_group.list.0.id }}">
+                            Mark as Completed
+                        </button>
+                    </div>
+                    <ul class="table-orders">
+                        {% for order in table_group.list %}
+                            <li data-order-id="{{ order.id }}"
+                                class="order-item {% if selected_order and order.id == selected_order.id %}active{% endif %}">
+                                Order {{ order.id }}
+                            </li>
+                        {% endfor %}
+                    </ul>
                 </li>
             {% endfor %}
         </ul>
     </div>
 
-    <!-- Right: Completed Orders -->
+    <!-- Right: Completed Tables -->
     <div class="right-column">
-        <ul class="orders-list" id="completed-orders-list">
-            {% for order in completed_orders %}
-                <li data-order-id="{{ order.id }}"
-                    class="order-item {% if selected_order and order.id == selected_order.id %}active{% endif %}">
-                    Order {{ order.id }} - Table {{ order.table.table_number }} ({{ order.status }})
-                    <button class="toggle-order-status" data-order-id="{{ order.id }}" data-new-status="Pending">
-                        Set as Pending
-                    </button>
+        {% regroup completed_orders by table as table_grouped_completed %}
+        <ul class="tables-list" id="completed-tables-list">
+            {% for table_group in table_grouped_completed %}
+                <li class="table-item {% if selected_table and table_group.grouper.id == selected_table.id %}active{% endif %}"
+                    data-table-id="{{ table_group.grouper.id }}"
+                    data-table-number="{{ table_group.grouper.table_number }}">
+                    <div class="table-header">
+                        <h3>Table {{ table_group.grouper.table_number }}</h3>
+                        <button class="reopen-table-orders"
+                                data-table-id="{{ table_group.grouper.id }}"
+                                data-order-id="{{ table_group.list.0.id }}">
+                            Set as Pending
+                        </button>
+                    </div>
+                    <ul class="table-orders">
+                        {% for order in table_group.list %}
+                            <li data-order-id="{{ order.id }}"
+                                class="order-item {% if selected_order and order.id == selected_order.id %}active{% endif %}">
+                                Order {{ order.id }}
+                            </li>
+                        {% endfor %}
+                    </ul>
                 </li>
             {% endfor %}
         </ul>
@@ -93,101 +128,163 @@
 </div>
 
 <script>
-    // Listen for order list clicks to load order details.
     document.addEventListener('DOMContentLoaded', function () {
         const orderDetails = document.getElementById('order-details');
+        const receiptTitle = document.getElementById('receipt-title');
 
-        function bindOrderClicks(containerId) {
+        // Function to handle table and order clicks
+        function handleTableItemClicks(containerId) {
             const container = document.getElementById(containerId);
             if (container) {
                 container.addEventListener('click', function (e) {
+                    // Handle table header or order item clicks
+                    let tableItem = e.target.closest('.table-item');
                     let orderItem = e.target.closest('.order-item');
-                    if (orderItem && !e.target.matches('.toggle-order-status')) {
+
+                    // If the click is on an order item
+                    if (orderItem && !e.target.matches('.complete-table-orders, .reopen-table-orders')) {
+                        let orderId = orderItem.getAttribute('data-order-id');
+                        let tableNumber = orderItem.closest('.table-item').getAttribute('data-table-number');
+
+                        loadOrderDetails(orderId);
+                        updateReceiptTitle(tableNumber);
+
+                        // Highlight the clicked order
                         document.querySelectorAll(".order-item").forEach(li => li.classList.remove("active"));
                         orderItem.classList.add("active");
+                    }
+                    // If the click is on a table header (but not on a button)
+                    else if (tableItem && !e.target.matches('.complete-table-orders, .reopen-table-orders, .order-item')) {
+                        // Get the first order ID from this table
+                        let firstOrderItem = tableItem.querySelector('.order-item');
+                        let tableNumber = tableItem.getAttribute('data-table-number');
 
-                        let orderId = orderItem.getAttribute('data-order-id');
-                        fetch(`/counter/orders/${orderId}/`)
-                            .then(response => response.json())
-                            .then(data => {
-                                let detailsHTML = "<table class='order-details-table'>";
-                                detailsHTML += `
-                                    <thead>
-                                        <tr>
-                                            <th>Item</th>
-                                            <th>Rate</th>
-                                            <th>Qty</th>
-                                            <th>Amount</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                `;
-                                let totalAmount = 0;
+                        if (firstOrderItem) {
+                            let orderId = firstOrderItem.getAttribute('data-order-id');
+                            loadOrderDetails(orderId);
+                            updateReceiptTitle(tableNumber);
 
-                                // Calculate the total amount from the order items
-                                data.items.forEach(item => {
-                                    let itemTotal = parseFloat(item.price) * item.quantity;
-                                    totalAmount += itemTotal;
-                                    detailsHTML += `
-                                        <tr>
-                                            <td>${item.name}</td>
-                                            <td>$${item.price}</td>
-                                            <td>${item.quantity}</td>
-                                            <td>$${itemTotal.toFixed(2)}</td>
-                                        </tr>
-                                    `;
-                                });
-
-                                // Calculate the GST (10%)
-                                let gstAmount = totalAmount * 0.10; // 10% GST
-                                let totalWithGST = totalAmount + gstAmount;
-
-                                // Add GST and total details
-                                detailsHTML += "</tbody></table>";
-                                detailsHTML += `
-                                    <div class="receipt-total">
-                                        <hr>
-                                        <p><strong>Total Amount:</strong> $${totalAmount.toFixed(2)}</p>
-                                        <p><strong>GST (10%):</strong> $${gstAmount.toFixed(2)}</p>
-                                        <p><strong>Total with GST:</strong> $${totalWithGST.toFixed(2)}</p>
-                                    </div>
-                                `;
-
-                                orderDetails.innerHTML = detailsHTML;
-                            });
+                            // Highlight the table
+                            document.querySelectorAll(".table-item").forEach(li => li.classList.remove("active"));
+                            tableItem.classList.add("active");
+                        }
                     }
 
-                    // Toggle button
-                    if (e.target.matches('.toggle-order-status')) {
+                    // Handle the "Mark All as Completed" button
+                    if (e.target.matches('.complete-table-orders')) {
                         e.stopPropagation();
 
                         let button = e.target;
                         let orderId = button.getAttribute('data-order-id');
-                        let newStatus = button.getAttribute('data-new-status');
 
-                        fetch(`/counter/orders/${orderId}/update/`, {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/x-www-form-urlencoded',
-                                'X-CSRFToken': '{{ csrf_token }}'
-                            },
-                            body: `status=${newStatus}`
-                        })
-                            .then(response => response.json())
-                            .then(data => {
-                                if (data.success) {
-                                    location.reload(); // Refresh the page to reflect changes
-                                } else {
-                                    alert('Failed to update order status.');
-                                }
-                            });
+                        updateOrderStatus(orderId, 'Completed');
+                    }
+
+                    // Handle the "Set All as Pending" button
+                    if (e.target.matches('.reopen-table-orders')) {
+                        e.stopPropagation();
+
+                        let button = e.target;
+                        let orderId = button.getAttribute('data-order-id');
+
+                        updateOrderStatus(orderId, 'Pending');
                     }
                 });
             }
         }
 
-        bindOrderClicks('pending-orders-list');
-        bindOrderClicks('completed-orders-list');
+        // Function to update the receipt title
+        function updateReceiptTitle(tableNumber) {
+            if (tableNumber) {
+                receiptTitle.innerHTML = `<h2>Table ${tableNumber} Orders</h2>`;
+            } else {
+                receiptTitle.innerHTML = '<h2>Order Details</h2>';
+            }
+        }
+
+        // Function to update order status
+        function updateOrderStatus(orderId, newStatus) {
+            fetch(`/counter/orders/${orderId}/update/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: `status=${newStatus}`
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    location.reload(); // Refresh the page to reflect changes
+                } else {
+                    alert('Failed to update order status.');
+                }
+            });
+        }
+
+        // Function to load order details for a specific order
+        function loadOrderDetails(orderId) {
+            fetch(`/counter/orders/${orderId}/`)
+                .then(response => response.json())
+                .then(data => {
+                    // Group items by order_id
+                    const orderItems = {};
+                    data.items.forEach(item => {
+                        if (!orderItems[item.order_id]) {
+                            orderItems[item.order_id] = [];
+                        }
+                        orderItems[item.order_id].push(item);
+                    });
+
+                    let detailsHTML = "";
+
+                    // Generate HTML for each order's items
+                    Object.keys(orderItems).forEach(orderId => {
+                        detailsHTML += `<h3>Order ${orderId}</h3>`;
+                        detailsHTML += "<table class='order-details-table'>";
+                        detailsHTML += `
+                            <thead>
+                                <tr>
+                                    <th>Item</th>
+                                    <th>Rate</th>
+                                    <th>Qty</th>
+                                    <th>Amount</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                        `;
+
+                        orderItems[orderId].forEach(item => {
+                            detailsHTML += `
+                                <tr>
+                                    <td>${item.name}</td>
+                                    <td>$${(parseFloat(item.price) / item.quantity).toFixed(2)}</td>
+                                    <td>${item.quantity}</td>
+                                    <td>$${item.price}</td>
+                                </tr>
+                            `;
+                        });
+
+                        detailsHTML += "</tbody></table>";
+                    });
+
+                    // Add totals section
+                    detailsHTML += `
+                        <div class="receipt-total">
+                            <hr>
+                            <p><strong>Sub Total:</strong> $${data.total_amount}</p>
+                            <p><strong>GST (10%):</strong> $${data.gst_amount}</p>
+                            <p><strong>Total Amount:</strong> $${data.total_with_gst}</p>
+                        </div>
+                    `;
+
+                    orderDetails.innerHTML = detailsHTML;
+                });
+        }
+
+        // Initialize click handlers for both tables lists
+        handleTableItemClicks('pending-tables-list');
+        handleTableItemClicks('completed-tables-list');
     });
 </script>
 

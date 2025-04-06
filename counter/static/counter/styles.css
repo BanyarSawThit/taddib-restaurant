@@ -24,10 +24,81 @@ body.order-management-page {
     box-sizing: border-box; /* Ensures padding doesn't affect the column size */
 }
 
-/* Styling for the orders list */
-.orders-list {
+/* Remove default list styling */
+.tables-list {
     list-style-type: none;
     padding: 0;
+    margin: 0;
+}
+
+/* Table Item Styling */
+.table-item {
+    background-color: #f9f9f9;
+    padding: 10px;
+    margin: 10px 0;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    cursor: pointer;
+    transition: transform 0.2s ease, background-color 0.2s ease;
+}
+
+/* Table Item Hover Effect */
+.table-item:hover {
+    background-color: #ffffff;
+}
+
+/* Active Table Item */
+.table-item.active {
+    background-color: #e0ffe0; /* Light green for active table */
+}
+
+/* Remove bullets from the list */
+ul.table-orders {
+    list-style-type: none;
+    padding: 0; /* Remove padding from the list */
+    margin: 8px 0 0 0; /* Remove margin from the list */
+}
+
+/* Make the order items inline and align them with the table ID */
+ul.table-orders li {
+    display: inline-block; /* Inline block so that the order IDs align with the table title */
+    margin-right: 9px; /* Space between the order IDs */
+}
+
+/* Optional: Style the active order ID for better visual feedback */
+ul.table-orders li.active {
+    font-weight: bold;
+    color: #007BFF; /* You can change the color based on your preference */
+}
+
+/* Aligning the table header content (table title and button) */
+.table-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* Styling the table title */
+.table-header h3 {
+    margin: 5px; /* Remove any margin */
+    font-size: 1.4em;
+    font-weight: bold;
+}
+
+/* Button to toggle order status - aligned to the right */
+.complete-table-orders, .reopen-table-orders {
+    background-color: #3498db;
+    font-size: 1em;
+    color: white;
+    padding: 5px 15px;
+    border-radius: 4px;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.complete-table-orders:hover, .reopen-table-orders:hover {
+    background-color: #2980b9;
 }
 
 .order-item {
@@ -35,11 +106,6 @@ body.order-management-page {
     justify-content: space-between; /* Space out the content and the button */
     align-items: center; /* Vertically align the items */
     padding: 8px;
-    border-bottom: 1px solid #eee;
-}
-
-.order-item.active {
-    background-color: #dfefff;
 }
 
 .order-details-table {
@@ -77,22 +143,6 @@ body.order-management-page {
 .receipt-total p strong {
     text-align: left;
 }
-
-/* Button to toggle order status - aligned to the right */
-button.toggle-order-status {
-    background-color: #3498db;
-    color: white;
-    padding: 5px 15px;
-    border-radius: 4px;
-    border: none;
-    cursor: pointer;
-    transition: background-color 0.3s;
-}
-
-button.toggle-order-status:hover {
-    background-color: #2980b9;
-}
-
 
 /* Sticky Title Layout */
 .title.three-columns {
