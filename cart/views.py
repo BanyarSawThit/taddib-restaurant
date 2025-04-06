@@ -36,7 +36,8 @@ def cart_add(request, table_id, item_id):
         request.session['cart'] = cart
 
         messages.success(request, "Item added to cart.")
-        return redirect('cart_view')
+        # return redirect('cart_view')
+        return redirect('menu_view', table_id=table_id)
     else:
         messages.error(request, "Invalid request method.")
         return redirect('menu_view', table_id=table_id)
@@ -84,6 +85,8 @@ def cart_view(request):
 
         detailed_cart.append({
             'item': item,
+            'table_id': cart_item.get('table_id'),
+            'item_id': cart_item.get('item_id'),
             'meat_option': meat_option,
             'spicy_level': spicy_level,
             'quantity': quantity,
@@ -159,3 +162,18 @@ def cart_confirm(request):
 
     messages.success(request, "Order placed successfully!")
     return redirect('menu_view', table_id=table_id)
+
+def cart_remove(request, table_id, item_id):
+    if request.method == "POST":
+        cart = request.session.get('cart', [])
+        # Create a new cart list excluding the matching item.
+        new_cart = [
+            ci for ci in cart
+            if not (str(ci.get('table_id')) == str(table_id) and str(ci.get('item_id')) == str(item_id))
+        ]
+        request.session['cart'] = new_cart
+        messages.success(request, "Item removed from cart.")
+        return redirect('cart_view')
+    else:
+        messages.error(request, "Invalid request method.")
+        return redirect('cart_view')

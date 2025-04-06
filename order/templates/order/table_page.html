@@ -1,16 +1,20 @@
 {% extends 'order/base.html' %}
 
 {% block content %}
-    <h2>Table Selection</h2>
-    {% for table in tables %}
-            <article>
-                {% if table.qr_code %}
-                    <h3><a href="{% url 'menu_view' table_id=table.pk %}">Table Number: {{ table.table_number }}
-                        <div><img src="{{ table.qr_code.url }}" alt="QR Code for Table {{ table.table_number }}"></div>
-                    </a></h3>
-                {% endif %}
-                <p>Availability: {{ table.availability }}</p>
-            </article>
+<h2>Table Selection</h2>
+<h2>Please select the table</h2>
 
-    {% endfor %}
+{% for table in tables %}
+<article>
+    <div id="table_selection">
+        {% if table.qr_code %}
+        <h3><a class="table-link" href="{% url 'menu_view' table_id=table.pk %}">Table Number: {{ table.table_number }}
+            <div><img src="{{ table.qr_code.url }}" alt="QR Code for Table {{ table.table_number }}"></div>
+        </a></h3>
+        {% endif %}
+        <p>Table Status: {% if table.availability %}Available{% else %}Occupied{% endif %}</p>
+    </div>
+</article>
+
+{% endfor %}
 {% endblock %}

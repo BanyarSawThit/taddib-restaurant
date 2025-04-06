@@ -1,6 +1,10 @@
 {% extends 'order/base.html' %}
+{% load static %}
 
 {% block content %}
+<link rel="stylesheet" href="{% static 'css/cart.css' %}">
+{#<script src="{% static 'js/cart.js' %}" defer></script>#}
+
     <h2>Cart Summary</h2>
     {% for item in cart %}
         <div>
@@ -19,9 +23,15 @@
 
             <p>Quantity: {{ item.quantity }}</p>
             <p>Total Price: ${{ item.item_total }}</p>
+
+            <!-- Remove button: posts to cart_remove with the index -->
+          <form method="POST" action="{% url 'cart_remove' item.table_id item.item.id %}">
+              {% csrf_token %}
+              <button type="submit">Remove</button>
+          </form>
         </div>
         <hr>
     {% endfor %}
 
-    <a href="{% url 'cart_confirm' %}">Confirm Order</a>
+    <a href="{% url 'cart_confirm' %}" style="color: #e49110">Confirm Order</a>
 {% endblock %}
